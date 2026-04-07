@@ -1,0 +1,49 @@
+# --- 虚幻引擎核心忽略项 ---
+Binaries/
+Build/
+DerivedDataCache/
+Intermediate/
+Saved/
+.vscode/
+.vs/*
+LamaErasure/x64/
+LamaErasure/x64/*
+LamaErasure/mark_images
+LamaErasure/models
+LamaErasure/Save
+LamaErasureCode
+LamaErasurePack
+
+x64/**/*
+./x64/*
+./x64/Debug
+./x64/Release
+*.xcworkspace
+*.v12.suo
+*.v11.suo
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.opendb
+*.txt
+*.zip
+
+# --- C++ 编译产生的巨型文件 (针对你的 190GB 报错) ---
+*.pdb
+*.pch
+*.ipch
+*.obj
+*.exe
+*.dll
+
+# --- 平台相关项目文件 ---
+/Platforms/
+
+# --- 外部插件与构建产物 ---
+Plugins/*/Binaries/
+Plugins/*/Intermediate/
+
+# --- 杂项 ---
+*.log
+*.tps
+*.bak
