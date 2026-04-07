@@ -47,6 +47,11 @@ void InpaintCanvas::initScene() {
     itemImg_ = scene_->addPixmap(QPixmap());
     itemMask_ = scene_->addPixmap(QPixmap());
     itemMask_->setZValue(10);
+
+    // 创建一个绿色的矢量框，放在最顶层 (ZValue更高)
+    itemRect_ = scene_->addRect(QRectF(), QPen(Qt::green, 3), Qt::NoBrush);
+    itemRect_->setZValue(20);
+    itemRect_->hide();                                                                      // 默认隐藏
 }
 
 bool InpaintCanvas::loadImage(const QString& file) {
@@ -89,6 +94,12 @@ void InpaintCanvas::clearMask()
 {
     if (mask_.isNull()) return;
     labelPoints_.clear();
+
+    // 清除框
+    boundingBox_ = QRectF();
+    itemRect_->setRect(QRectF());
+    itemRect_->hide();
+
     mask_.fill(0);
     updateMaskPixmap();
     emit maskChanged();
@@ -133,6 +144,18 @@ void InpaintCanvas::mousePressEvent(QMouseEvent* e) {
     drawing_ = true;
     QPointF sp = viewToScenePos(e->pos());
 
+    // 按住 Shift + 鼠标左键，进入画框模式
+    if ((e->modifiers() & Qt::ShiftModifier) && e->button() == Qt::LeftButton) {
+        isDraggingBox_ = true;
+        boxStartPos_ = sp;
+        boundingBox_ = QRectF(sp, sp); // 初始化一个小点
+        itemRect_->setRect(boundingBox_);
+        itemRect_->show();
+        e->accept();
+        return;
+    }
+
+    // 左键涂点右键擦除
     QPainter p(&mask_);
     p.setRenderHint(QPainter::Antialiasing, true);
 
@@ -166,7 +189,28 @@ void InpaintCanvas::mousePressEvent(QMouseEvent* e) {
     return;
 }
 
-void InpaintCanvas::mouseReleaseEvent(QMouseEvent* e) {
+void InpaintCanvas::mouseMoveEvent(QMouseEvent* e)
+{
+    if (isDraggingBox_) 
+    {
+        QPointF sp = viewToScenePos(e->pos());
+        // normalized() 可以保证无论往哪个方向拖，长宽都是正数
+        boundingBox_ = QRectF(boxStartPos_, sp).normalized();
+        itemRect_->setRect(boundingBox_);
+        e->accept();
+        return;
+    }
+    // 如果没有画框，走默认逻辑（比如你原本有没有在 move 里写点涂抹逻辑，如果没有可以直接调父类）
+    QGraphicsView::mouseMoveEvent(e);
+}
+
+void InpaintCanvas::mouseReleaseEvent(QMouseEvent* e) 
+{
+    if (isDraggingBox_ && e->button() == Qt::LeftButton) {
+        isDraggingBox_ = false;
+        e->accept();
+        return;
+    }
     drawing_ = false;
     QGraphicsView::mouseReleaseEvent(e);
 }
