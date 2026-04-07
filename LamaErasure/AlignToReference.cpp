@@ -109,7 +109,7 @@ bool AlignToReference::ComputeOrb(const cv::Mat& grayIn,
     return (!kps.empty() && !desc.empty());
 }
 
-bool AlignToReference::SetReference(const QImage& refRgb, const QImage& refMaskGray, QList<QPointF> labelPoints, const Params& p)
+bool AlignToReference::SetReference(const QImage& refRgb, const QImage& refMaskGray, QList<QPointF> labelPoints, const QRectF& refRect, const Params& p)
 {
     p_ = p;
     ready_ = false;
@@ -126,6 +126,9 @@ bool AlignToReference::SetReference(const QImage& refRgb, const QImage& refMaskG
 
     // 2. 将QList转换成std::vector
     refPointsA_ = qListToCvVec(labelPoints);
+
+    // 3. 存基准图的大框 (Bounding Box)
+    refRectA_ = refRect;
 
     ready_ = true;
     return true;
@@ -277,7 +280,7 @@ QImage AlignToReference::GrayMatToQImage(const cv::Mat& gray)  const
     return out;
 }
 
-QImage AlignToReference::MakeMaskFor(const QImage& imgB, QList<QPointF>* ptsOutB, bool* bOk) const
+QImage AlignToReference::MakeMaskFor(const QImage& imgB, QList<QPointF>* ptsOutB, QRectF* rectOutB, bool* bOk) const
 {
     // 0. 初始化与安全检查
     if (bOk) *bOk = false;
@@ -305,12 +308,38 @@ QImage AlignToReference::MakeMaskFor(const QImage& imgB, QList<QPointF>* ptsOutB
         *ptsOutB = cvVecToQList(ptsCvB);
     }
 
-    // 3. 掩码图对齐变换 (Mask Warping)
+    // 3. 自动计算缩放、平移后的大框 (Bounding Box)
+    if (rectOutB && !refRectA_.isNull())
+    {
+        // a. 求 A 到 B 的逆矩阵（把 A 上的框映射到 B 上）
+        cv::Mat M_A2B;
+        cv::invertAffineTransform(M_B2A, M_A2B);
+
+        // b. 提取基准框的 4 个角点
+        std::vector<cv::Point2f> cornersA = {
+            cv::Point2f(refRectA_.left(), refRectA_.top()),
+            cv::Point2f(refRectA_.right(), refRectA_.top()),
+            cv::Point2f(refRectA_.right(), refRectA_.bottom()),
+            cv::Point2f(refRectA_.left(), refRectA_.bottom())
+        };
+
+        // c. 用仿射逆矩阵把这 4 个角点投影到目标图 B 上
+        std::vector<cv::Point2f> cornersB;
+        cv::transform(cornersA, cornersB, M_A2B);
+
+        // d. 求变换后的 4 个点在 B 图上的“最小正交外接矩形”
+        cv::Rect cvRectB = cv::boundingRect(cornersB);
+
+        // e. 转换回 Qt 的 QRectF 格式
+        *rectOutB = QRectF(cvRectB.x, cvRectB.y, cvRectB.width, cvRectB.height);
+    }
+
+    // 4. 掩码图对齐变换 (Mask Warping)
     // 将基准图的 MaskA 应用仿射变换，生成覆盖在当前图 B 上的 MaskB
     // p_.dilateR 用于对生成的遮罩进行膨胀处理，确保完全盖住贴纸边缘
     cv::Mat maskB = WarpMask_AtoB(refMaskA_, M_B2A, grayB.size(), p_.dilateR);
 
-    // 4. 返回结果
+    // 5. 返回结果
     if (bOk) *bOk = true;
     return GrayMatToQImage(maskB);
 }

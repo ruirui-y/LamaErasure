@@ -282,10 +282,11 @@ void MainWindow::onQuickInpaint()
     }
     QString labelPath = sourceDir.absoluteFilePath("labels/" + fileInfo.baseName() + ".txt");
     QList<QPointF> label_points = canvas_->labelPoints();
+    QRectF bbox = canvas_->boundingBox();
 
     // 4. 执行异步擦除
     emit DisErrasureImage(canvas_->sourceImage(), canvas_->maskImage(), 
-        [this, outputPath, label_points, labelPath](const QImage& result)
+    [this, outputPath, bbox, label_points, labelPath](const QImage& result)
         {
             if (result.isNull())
                 return;
@@ -294,7 +295,7 @@ void MainWindow::onQuickInpaint()
             if (const_cast<QImage&>(result).save(outputPath))
             {
                 // 保存标签
-                saveYoloLabels(label_points, labelPath, result.size());
+                saveYoloLabels(bbox, label_points, labelPath, result.size());
 
                 qDebug() << "Saved image to:" << outputPath;
                 qDebug() << "Saved label to:" << labelPath;
@@ -360,7 +361,7 @@ void MainWindow::onSetAsReference()
     p.minInliers = 25;
     p.dilateR = 2;
 
-    const bool ok = align_->SetReference(canvas_->sourceImage(), canvas_->maskImage(), canvas_->labelPoints(), p);
+    const bool ok = align_->SetReference(canvas_->sourceImage(), canvas_->maskImage(), canvas_->labelPoints(), canvas_->boundingBox(), p);
     statusBar()->showMessage(ok ? "Reference set OK" : "Reference set FAILED", 2000);
 }
 
@@ -415,7 +416,8 @@ void MainWindow::onTestOneImage()
 
     bool ok = false;
     QList<QPointF> label_points;
-    QImage maskB = align_->MakeMaskFor(imgB, &label_points, &ok);
+    QRectF bbox;
+    QImage maskB = align_->MakeMaskFor(imgB, &label_points, &bbox, &ok);
     if (!ok || maskB.isNull()) {
         statusBar()->showMessage("Align failed (not enough inliers).", 2000);
         return;

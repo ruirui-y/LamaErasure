@@ -4,6 +4,7 @@
 #include <QImage>
 #include <opencv2/opencv.hpp>
 #include <memory>
+#include <QRectF>
 
 class AlignToReference
 {
@@ -22,11 +23,11 @@ public:
     AlignToReference();
 
     // 设置基准图 A 与 maskA（maskA必须和A同尺寸）
-    bool SetReference(const QImage& refRgb, const QImage& refMaskGray, QList<QPointF> labelPoints, const Params& p = Params());
+    bool SetReference(const QImage& refRgb, const QImage& refMaskGray, QList<QPointF> labelPoints, const QRectF& refRect, const Params& p);
 
     // 给一张 B，返回对齐后的 maskB（与B同尺寸）
     // bOk=false 表示对齐失败（你可选择返回空mask或直接跳过）
-    QImage MakeMaskFor(const QImage& imgB, QList<QPointF>* ptsOutB, bool* bOk = nullptr) const;
+    QImage MakeMaskFor(const QImage& imgB, QList<QPointF>* ptsOutB, QRectF* rectOutB, bool* bOk = nullptr) const;
 
     bool IsReady() const { return ready_; }
 
@@ -58,6 +59,7 @@ private:
     cv::Mat refGrayA_;                                                                                      // 基准图
     cv::Mat refMaskA_;                                                                                      // 基准图对应的mask
     std::vector<cv::Point2f> refPointsA_;                                                                   // 存储基准图 A 上的穴位标签点
+    QRectF refRectA_;                                                                                       // 存储基准图 A 上的大框
 
     std::vector<cv::KeyPoint> kpsA_;
     cv::Mat descA_;                                                                                         // ORB descriptors

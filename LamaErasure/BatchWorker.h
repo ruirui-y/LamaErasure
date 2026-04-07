@@ -75,7 +75,8 @@ public slots:
             // 2. 自动化对齐与标签/掩码生成
             bool ok = false;
             QList<QPointF> label_points;
-            QImage maskForThis = align_->MakeMaskFor(img, &label_points, &ok);
+            QRectF target_box;
+            QImage maskForThis = align_->MakeMaskFor(img, &label_points, &target_box, &ok);
             if (!ok || maskForThis.isNull())
             {
                 continue;
@@ -105,7 +106,7 @@ public slots:
 
             // 6. 保存对应的 YOLO 标签文件
             QString labelPath = QDir(labelDir_).filePath(fi.baseName() + ".txt");
-            saveYoloLabels(label_points, labelPath, img.size());
+            saveYoloLabels(target_box, label_points, labelPath, img.size());
 
             emit progress(i + 1, total, fi.fileName());
         }
