@@ -6,6 +6,9 @@
 #include <QSemaphore>
 #include <QMetaObject>
 #include <atomic>
+#include "Global.h"
+
+class SqlExec;
 
 class WorkerThread : public QThread
 {
@@ -18,27 +21,45 @@ public:
 
     QObject* Dispatcher() const { return dispatcher_.load(std::memory_order_acquire); }
 
-    // 在该 Worker 线程创建 QObject，并返回 QSharedPointer（析构走 deleteLater）
-    template<class T, class... Args>
-    QSharedPointer<T> CreateQObject(Args&&... args)
+public:
+    // 终极泛型创建函数
+    // 参数1：你要创建的对象类型 T
+    // 参数2：你要使用的智能指针类型 SmartPtr (默认是 QSharedPointer)
+    // 参数3：构造函数的参数 Args...
+    template<class T, template<typename> class SmartPtr = QSharedPointer, class... Args>
+    SmartPtr<T> CreateQObject(Args&&... args)
     {
         static_assert(std::is_base_of_v<QObject, T>, "T must derive from QObject");
 
         QObject* d = Dispatcher();
         if (!d) return {};
 
-        // 线程内调用：直接 new，避免 Blocking 自死锁
+        // 防弹版删除器 (完美兼容 QSharedPointer 和 std::shared_ptr)
+        auto safeDeleter = [](T* obj)
+            {
+                if (!obj) return;
+                QThread* objThread = obj->thread();
+
+                if (!objThread || !objThread->isRunning() || objThread->isFinished()) {
+                    delete obj;
+                }
+                else {
+                    obj->deleteLater();
+                }
+            };
+
+        // 线程内调用：直接 new
         if (QThread::currentThread() == d->thread())
         {
             T* raw = new T(std::forward<Args>(args)...);
-            return QSharedPointer<T>(raw, &QObject::deleteLater);
+            return SmartPtr<T>(raw, safeDeleter);                               // 泛型构造
         }
 
-        QSharedPointer<T> out;
+        SmartPtr<T> out;
         QMetaObject::invokeMethod(d, [&]()
             {
                 T* raw = new T(std::forward<Args>(args)...);
-                out = QSharedPointer<T>(raw, &QObject::deleteLater);
+                out = SmartPtr<T>(raw, safeDeleter);                            // 泛型构造
             }, Qt::BlockingQueuedConnection);
 
         return out;

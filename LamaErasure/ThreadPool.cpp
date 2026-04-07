@@ -1,12 +1,11 @@
-#include "ThreadPool.h"
+﻿#include "ThreadPool.h"
 #include <QMutexLocker>
 #include <QEventLoop>
 
-#include "WorkerThread.h"
-
-ThreadPool::ThreadPool(QObject *parent)
+ThreadPool::ThreadPool(QObject* parent)
 	: QObject(parent)
-{}
+{
+}
 
 ThreadPool::~ThreadPool()
 {
@@ -17,7 +16,7 @@ void ThreadPool::Start(size_t threadNum)
 {
 	QMutexLocker locker(&mutex_);
 	if (started_) return;
-	if(threadNum == 0) threadNum = QThread::idealThreadCount();
+	if (threadNum == 0) threadNum = QThread::idealThreadCount();
 	for (size_t i = 0; i < threadNum; ++i)
 	{
 		QSharedPointer<WorkerThread> thread = QSharedPointer<WorkerThread>(new WorkerThread());
@@ -27,17 +26,17 @@ void ThreadPool::Start(size_t threadNum)
 
 		thread->start();
 		thread->setObjectName(QString::number(i));
-		loop.exec();																									// �ȵ� worker run() �� emit Ready()
+		loop.exec();																									// µÈµ½ worker run() Àï emit Ready()
 
 		threads_.push_back(thread);
 	}
-	
+
 	started_ = true;
 }
 
 void ThreadPool::Stop()
 {
-    QMutexLocker locker(&mutex_);
+	QMutexLocker locker(&mutex_);
 	if (!started_) return;
 	for (auto& thread : threads_)
 	{
@@ -50,7 +49,7 @@ void ThreadPool::Stop()
 
 QSharedPointer<WorkerThread> ThreadPool::GetThread()
 {
-    QMutexLocker locker(&mutex_);
+	QMutexLocker locker(&mutex_);
 	if (!started_) return nullptr;
 	if (threads_.empty()) return nullptr;
 

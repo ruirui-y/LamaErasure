@@ -21,6 +21,18 @@
       <UniqueIdentifier>{639EADAA-A684-42e4-A9AD-28FC9BCB8F7C}</UniqueIdentifier>
       <Extensions>ts</Extensions>
     </Filter>
+    <Filter Include="Header Files\Thread">
+      <UniqueIdentifier>{802ddd3d-2627-4e18-87a1-1e697267d018}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Thread">
+      <UniqueIdentifier>{e7e3602d-52ce-4cbf-829e-cd34e26fee27}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Global">
+      <UniqueIdentifier>{85929621-5f84-4f3e-bb1b-08efd6ff6947}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Global">
+      <UniqueIdentifier>{c154fc0b-2cac-49c2-b946-1acf7913e50f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="LamaErasure.qrc">
@@ -43,9 +55,6 @@
     <ClCompile Include="LamaOrt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ConfigReader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="InpaintCanvas.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -59,27 +68,30 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ThreadPool.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Thread</Filter>
     </ClCompile>
     <ClCompile Include="WorkerThread.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Thread</Filter>
+    </ClCompile>
+    <ClCompile Include="ConfigReader.cpp">
+      <Filter>Source Files\Global</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="singletion.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ConfigReader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GlobalStruct.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="AlignToReference.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Global.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Global</Filter>
+    </ClInclude>
+    <ClInclude Include="GlobalStruct.h">
+      <Filter>Header Files\Global</Filter>
+    </ClInclude>
+    <ClInclude Include="singletion.h">
+      <Filter>Header Files\Global</Filter>
+    </ClInclude>
+    <ClInclude Include="ConfigReader.h">
+      <Filter>Header Files\Global</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -99,10 +111,10 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="ThreadPool.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Thread</Filter>
     </QtMoc>
     <QtMoc Include="WorkerThread.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Thread</Filter>
     </QtMoc>
   </ItemGroup>
 </Project>
