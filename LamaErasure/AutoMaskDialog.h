@@ -1,4 +1,4 @@
-#ifndef AUTO_MASK_DIALOG_H
+ï»¿#ifndef AUTO_MASK_DIALOG_H
 #define AUTO_MASK_DIALOG_H
 
 #include <QDialog>
@@ -13,15 +13,15 @@ class AutoMaskDialog : public QDialog {
 public:
     explicit AutoMaskDialog(QWidget* parent = nullptr);
 
-    // ¶ÁÈ¡ÓÃ»§ÌîĞ´µÄ²ÎÊı
+    // è¯»å–ç”¨æˆ·å¡«å†™çš„å‚æ•°
     MaskParams params() const;
 
 private:
     QSpinBox* spMinR_ = nullptr;
     QSpinBox* spMaxR_ = nullptr;
-    QSpinBox* spMaskN_ = nullptr;                                                       // ÊıÁ¿
-    QSpinBox* spMargin_ = nullptr;                                                      // ÅòÕÍ
-    QDoubleSpinBox* spCircle_ = nullptr;                                                // Ô²¶È
+    QSpinBox* spMaskN_ = nullptr;                                                       // æ•°é‡
+    QSpinBox* spMargin_ = nullptr;                                                      // è†¨èƒ€
+    QDoubleSpinBox* spCircle_ = nullptr;                                                // åœ†åº¦
 
     QDialogButtonBox* buttons_ = nullptr;
 };

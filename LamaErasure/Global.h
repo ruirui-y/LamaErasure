@@ -1,4 +1,4 @@
-#ifndef GLOBAL_H
+Ôªø#ifndef GLOBAL_H
 #define GLOBAL_H
 
 #include <QImage>
@@ -15,49 +15,49 @@
 
 using ImageCallback = std::function<void(const QImage&)>;
 
-// ±£¥Ê±Í«©
+// ‰øùÂ≠òÊ†áÁ≠æ
 inline void saveYoloLabels(const QRectF& bbox, const QList<QPointF>& points, const QString& labelPath, const QSize& imgSize)
 {
     QFile file(labelPath);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        qDebug() << "Œﬁ∑®¥¥Ω®±Í«©Œƒº˛: " << labelPath;
+        qDebug() << "Êó†Ê≥ïÂàõÂª∫Ê†áÁ≠æÊñá‰ª∂: " << labelPath;
         return;
     }
 
     QTextStream out(&file);
 
-    // 2. ◊º±∏πÈ“ªªØ≤Œ ˝
+    // 2. ÂáÜÂ§áÂΩí‰∏ÄÂåñÂèÇÊï∞
     double w = imgSize.width();
     double h = imgSize.height();
 
-    // 1. πÈ“ªªØ¥ÛøÚ BBox ◊¯±Í (÷––ƒX, ÷––ƒY, øÌ, ∏ﬂ)
-    //  π”√ std::clamp »∑±£◊¯±Í‘⁄ 0~1 ÷Æº‰£¨∑¿÷π∑¬…‰±‰ªª ±øÚµƒ±ﬂ‘µ≥¨≥ˆÕº∆¨±ﬂΩÁ
+    // 1. ÂΩí‰∏ÄÂåñÂ§ßÊ°Ü BBox ÂùêÊ†á (‰∏≠ÂøÉX, ‰∏≠ÂøÉY, ÂÆΩ, È´ò)
+    // ‰ΩøÁî® std::clamp Á°Æ‰øùÂùêÊ†áÂú® 0~1 ‰πãÈó¥ÔºåÈò≤Ê≠¢‰ªøÂ∞ÑÂèòÊç¢Êó∂Ê°ÜÁöÑËæπÁºòË∂ÖÂá∫ÂõæÁâáËæπÁïå
     double x_center = std::clamp((bbox.x() + bbox.width() / 2.0) / w, 0.0, 1.0);
     double y_center = std::clamp((bbox.y() + bbox.height() / 2.0) / h, 0.0, 1.0);
     double boxW = std::clamp(bbox.width() / w, 0.0, 1.0);
     double boxH = std::clamp(bbox.height() / h, 0.0, 1.0);
 
-    // 2. –¥»Î¿‡± ID (ƒ¨»œ 0) ∫Õ¥ÛøÚ ˝æ›
+    // 2. ÂÜôÂÖ•Á±ªÂà´ ID (ÈªòËÆ§ 0) ÂíåÂ§ßÊ°ÜÊï∞ÊçÆ
     QString line = QString("0 %1 %2 %3 %4")
         .arg(x_center, 0, 'f', 6)
         .arg(y_center, 0, 'f', 6)
         .arg(boxW, 0, 'f', 6)
         .arg(boxH, 0, 'f', 6);
 
-    // 3. πÈ“ªªØ≤¢◊∑º”À˘”–πÿº¸µ„◊¯±Í (X, Y, ø…º˚∂»)
+    // 3. ÂΩí‰∏ÄÂåñÂπ∂ËøΩÂä†ÊâÄÊúâÂÖ≥ÈîÆÁÇπÂùêÊ†á (X, Y, ÂèØËßÅÂ∫¶)
     for (const QPointF& pt : points) {
         double px = std::clamp(pt.x() / w, 0.0, 1.0);
         double py = std::clamp(pt.y() / h, 0.0, 1.0);
 
-        // ∏Ò Ω£∫px py visibility (’‚¿Ôµƒ '2' ¥˙±Ìπÿº¸µ„ø…º˚«““—±Í◊¢)
+        // Ê†ºÂºèÔºöpx py visibility (ËøôÈáåÁöÑ '2' ‰ª£Ë°®ÂÖ≥ÈîÆÁÇπÂèØËßÅ‰∏îÂ∑≤Ê†áÊ≥®)
         line += QString(" %1 %2 2").arg(px, 0, 'f', 6).arg(py, 0, 'f', 6);
     }
 
-    // –¥»ÎŒƒº˛
+    // ÂÜôÂÖ•Êñá‰ª∂
     out << line << "\n";
     file.close();
 
-    qDebug() << u8"≥…π¶µº≥ˆ YOLO Pose ±Í«©÷¡: " << labelPath;
+    qDebug() << u8"ÊàêÂäüÂØºÂá∫ YOLO Pose Ê†áÁ≠æËá≥: " << labelPath;
 }
 
 #endif // GLOBAL_H

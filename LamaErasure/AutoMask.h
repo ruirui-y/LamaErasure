@@ -1,4 +1,4 @@
-#ifndef AUTOMASK_H
+ï»¿#ifndef AUTOMASK_H
 #define AUTOMASK_H
 
 #include <QObject>
@@ -26,7 +26,7 @@ private:
 	struct CircleCand {
 		cv::Point2f c;
 		float r = 0.f;
-		double score = 0.0; // µ¥¸öÔ²ÏñÌùÖ½µÄ·Ö
+		double score = 0.0; // å•ä¸ªåœ†åƒè´´çº¸çš„åˆ†
 	};
 
 	cv::Mat QImageToBgrMat(const QImage& img) const;

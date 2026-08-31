@@ -1,14 +1,14 @@
-#ifndef GLOBAL_STRUCT_H
+ï»¿#ifndef GLOBAL_STRUCT_H
 #define GLOBAL_STRUCT_H
 
 struct MaskParams
 {
-	int min_r;									// ×îĞ¡°ë¾¶
-	int max_r;									// ×î´ó°ë¾¶
-	int mask_num;								// Éú³ÉµÄmask¸öÊı
-	double area;								// maskÃæ»ı
-	double circularity;							// Ô²¶È
-	int marginPx;								// ÅòÕÍ
+	int min_r;									// æœ€å°åŠå¾„
+	int max_r;									// æœ€å¤§åŠå¾„
+	int mask_num;								// ç”Ÿæˆçš„maskä¸ªæ•°
+	double area;								// maské¢ç§¯
+	double circularity;							// åœ†åº¦
+	int marginPx;								// è†¨èƒ€
 };
 
 #endif

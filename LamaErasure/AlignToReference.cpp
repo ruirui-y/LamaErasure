@@ -1,4 +1,4 @@
-#include "AlignToReference.h"
+ï»¿#include "AlignToReference.h"
 #include <opencv2/features2d.hpp>
 #include <opencv2/calib3d.hpp>
 #include <opencv2/imgproc.hpp>
@@ -13,23 +13,23 @@ static inline bool ValidateGray8(const cv::Mat& m)
     if (m.channels() != 1) return false;
     if (m.rows <= 0 || m.cols <= 0) return false;
     if (!m.data) return false;
-    // ¹Ø¼ü£ºstep ±ØĞë >= cols£¨Ã¿ĞĞÖÁÉÙÒªÓĞ cols ¸ö×Ö½Ú£©
+    // å…³é”®ï¼šstep å¿…é¡» >= colsï¼ˆæ¯è¡Œè‡³å°‘è¦æœ‰ cols ä¸ªå­—èŠ‚ï¼‰
     if ((int)m.step < m.cols) return false;
     return true;
 }
 
-// °ÑÈÎÒâÊäÈë±ä³É£ºCV_8UC1 + step==cols + self-owned buffer
+// æŠŠä»»æ„è¾“å…¥å˜æˆï¼šCV_8UC1 + step==cols + self-owned buffer
 static cv::Mat MakeSafeGray8(const cv::Mat& in)
 {
     if (in.empty()) return cv::Mat();
 
     cv::Mat m = in;
 
-    // depth ¶µµ×
+    // depth å…œåº•
     if (m.depth() != CV_8U)
         m.convertTo(m, CV_8U);
 
-    // channel ¶µµ×
+    // channel å…œåº•
     if (m.channels() == 3)
         cv::cvtColor(m, m, cv::COLOR_BGR2GRAY);
     else if (m.channels() == 4)
@@ -37,7 +37,7 @@ static cv::Mat MakeSafeGray8(const cv::Mat& in)
     else if (m.channels() != 1)
         return cv::Mat();
 
-    // ¹Ø¼ü£ºÖØ½¨Ò»¸ö¡°step=cols¡±µÄ¸É¾» Mat£¨ÖğĞĞ memcpy£¬ÍêÈ«²»ÒÀÀµÔ­ step£©
+    // å…³é”®ï¼šé‡å»ºä¸€ä¸ªâ€œstep=colsâ€çš„å¹²å‡€ Matï¼ˆé€è¡Œ memcpyï¼Œå®Œå…¨ä¸ä¾èµ–åŸ stepï¼‰
     cv::Mat out(m.rows, m.cols, CV_8UC1);
     for (int y = 0; y < m.rows; ++y) {
         const uchar* src = m.ptr<uchar>(y);
@@ -62,7 +62,7 @@ cv::Mat AlignToReference::ToGrayMaskU8(const QImage& maskGray)
     cv::Mat mat(m.height(), m.width(), CV_8UC1,
         const_cast<uchar*>(m.bits()), m.bytesPerLine());
     cv::Mat out = mat.clone();
-    // ¶şÖµ»¯µ½ 0/255
+    // äºŒå€¼åŒ–åˆ° 0/255
     cv::threshold(out, out, 127, 255, cv::THRESH_BINARY);
     return out;
 }
@@ -74,7 +74,7 @@ bool AlignToReference::ComputeOrb(const cv::Mat& grayIn,
     kps.clear();
     desc.release();
 
-    // ÏÈÇ¿ĞĞ×ö³É¡°¾ø¶Ô°²È«µÄ»Ò¶È Mat¡±
+    // å…ˆå¼ºè¡Œåšæˆâ€œç»å¯¹å®‰å…¨çš„ç°åº¦ Matâ€
     cv::Mat gray = MakeSafeGray8(grayIn);
     if (!ValidateGray8(gray)) {
         qDebug() << "ComputeOrb: invalid gray input. "
@@ -87,9 +87,9 @@ bool AlignToReference::ComputeOrb(const cv::Mat& grayIn,
         return false;
     }
 
-    // ¸ø ORB ¸ü±£ÊØµÄ²ÎÊı£¨±ÜÃâĞ¡Í¼/±ß½çÎÊÌâ£©
-    const int edgeTh = 15;      // 31 ÓĞÊ±¶ÔĞ¡Í¼/ROI ºÜ²»ÓÑºÃ
-    const int patch = 31;       // ³£ÓÃ 31
+    // ç»™ ORB æ›´ä¿å®ˆçš„å‚æ•°ï¼ˆé¿å…å°å›¾/è¾¹ç•Œé—®é¢˜ï¼‰
+    const int edgeTh = 15;      // 31 æœ‰æ—¶å¯¹å°å›¾/ROI å¾ˆä¸å‹å¥½
+    const int patch = 31;       // å¸¸ç”¨ 31
     const int fastTh = 10;
 
     cv::Ptr<cv::ORB> orb = cv::ORB::create(
@@ -116,7 +116,7 @@ bool AlignToReference::SetReference(const QImage& refRgb, const QImage& refMaskG
 
     if (refRgb.isNull() || refMaskGray.isNull()) return false;
 
-    // 1. Í¼Ïñ´¦ÀíÓëORBÌØÕ÷ÌáÈ¡
+    // 1. å›¾åƒå¤„ç†ä¸ORBç‰¹å¾æå–
     cv::Mat bgrA = QImageToBgrMat(refRgb).clone();
     refGrayA_ = ToGray(bgrA);
     refMaskA_ = ToGrayMaskU8(refMaskGray);
@@ -124,10 +124,10 @@ bool AlignToReference::SetReference(const QImage& refRgb, const QImage& refMaskG
     if (refMaskA_.size() != refGrayA_.size()) return false;
     if (!ComputeOrb(refGrayA_, kpsA_, descA_)) return false;
 
-    // 2. ½«QList×ª»»³Éstd::vector
+    // 2. å°†QListè½¬æ¢æˆstd::vector
     refPointsA_ = qListToCvVec(labelPoints);
 
-    // 3. ´æ»ù×¼Í¼µÄ´ó¿ò (Bounding Box)
+    // 3. å­˜åŸºå‡†å›¾çš„å¤§æ¡† (Bounding Box)
     refRectA_ = refRect;
 
     ready_ = true;
@@ -139,17 +139,17 @@ bool AlignToReference::EstimateAffine_B2A(const cv::Mat& grayB, cv::Mat& M_B2A, 
     outInliers = 0;
     M_B2A.release();
 
-    // ÌáÈ¡ÌØÕ÷
+    // æå–ç‰¹å¾
     std::vector<cv::KeyPoint> kpsB;
     cv::Mat descB;
     if (!ComputeOrb(grayB, kpsB, descB)) return false;
 
-    // ½«BÀïµÄÌØÕ÷È¡Óë»ù×¼Í¼µÄµã½øĞĞÖğÒ»±È¶Ô
+    // å°†Bé‡Œçš„ç‰¹å¾å–ä¸åŸºå‡†å›¾çš„ç‚¹è¿›è¡Œé€ä¸€æ¯”å¯¹
     cv::BFMatcher matcher(cv::NORM_HAMMING, false);
     std::vector<std::vector<cv::DMatch>> knn;
     matcher.knnMatch(descB, descA_, knn, 2);
 
-    // É¸Ñ¡³öºÃµÄµã¶Ô
+    // ç­›é€‰å‡ºå¥½çš„ç‚¹å¯¹
     std::vector<cv::DMatch> good;
     good.reserve(knn.size());
     for (auto& m : knn)
@@ -161,7 +161,7 @@ bool AlignToReference::EstimateAffine_B2A(const cv::Mat& grayB, cv::Mat& M_B2A, 
 
     if ((int)good.size() < 8) return false;
 
-    // È¡µã¶Ô£ºB->A
+    // å–ç‚¹å¯¹ï¼šB->A
     std::vector<cv::Point2f> ptsB, ptsA;
     ptsB.reserve(good.size());
     ptsA.reserve(good.size());
@@ -172,7 +172,7 @@ bool AlignToReference::EstimateAffine_B2A(const cv::Mat& grayB, cv::Mat& M_B2A, 
         ptsA.push_back(kpsA_[d.trainIdx].pt);
     }
 
-    // ·ÂÉä£¨Ğı×ª/Ëõ·Å/Æ½ÒÆ£©+ RANSAC
+    // ä»¿å°„ï¼ˆæ—‹è½¬/ç¼©æ”¾/å¹³ç§»ï¼‰+ RANSAC
     cv::Mat inlierMask;
     M_B2A = cv::estimateAffinePartial2D(
         ptsB, ptsA,
@@ -182,7 +182,7 @@ bool AlignToReference::EstimateAffine_B2A(const cv::Mat& grayB, cv::Mat& M_B2A, 
 
     if (M_B2A.empty()) return false;
 
-    // Í³¼Æ inliers
+    // ç»Ÿè®¡ inliers
     int cnt = 0;
     for (int i = 0; i < inlierMask.rows; ++i)
         cnt += (inlierMask.at<uchar>(i) != 0);
@@ -195,11 +195,11 @@ std::vector<cv::Point2f> AlignToReference::TransformPoints_AtoB(const cv::Mat& M
 {
     if (M_B2A.empty() || refPointsA_.empty()) return {};
 
-    // 1. ÇóÄæ¾ØÕó£º°Ñ [B -> A] µÄ±ä»»×ªÎª [A -> B]
+    // 1. æ±‚é€†çŸ©é˜µï¼šæŠŠ [B -> A] çš„å˜æ¢è½¬ä¸º [A -> B]
     cv::Mat M_A2B;
     cv::invertAffineTransform(M_B2A, M_A2B);
 
-    // 2. Ê¹ÓÃ OpenCV µÄ transform º¯ÊıÅúÁ¿±ä»»×ø±êµã
+    // 2. ä½¿ç”¨ OpenCV çš„ transform å‡½æ•°æ‰¹é‡å˜æ¢åæ ‡ç‚¹
     std::vector<cv::Point2f> ptsB;
     cv::transform(refPointsA_, ptsB, M_A2B);
 
@@ -212,7 +212,7 @@ cv::Mat AlignToReference::WarpMask_AtoB(
     const cv::Size& sizeB,
     int dilateR)
 {
-    // ĞèÒª A->B£º¶Ô M_B2A ÇóÄæ
+    // éœ€è¦ A->Bï¼šå¯¹ M_B2A æ±‚é€†
     cv::Mat M_A2B;
     cv::invertAffineTransform(M_B2A, M_A2B);
 
@@ -223,7 +223,7 @@ cv::Mat AlignToReference::WarpMask_AtoB(
         cv::BORDER_CONSTANT,
         cv::Scalar(0));
 
-    // ¶şÖµ»¯Ò»ÏÂ·ÀÖ¹²åÖµÃ«±ß£¨ÀíÂÛÉÏnearest²»»á£¬µ«±£ÏÕ£©
+    // äºŒå€¼åŒ–ä¸€ä¸‹é˜²æ­¢æ’å€¼æ¯›è¾¹ï¼ˆç†è®ºä¸Šnearestä¸ä¼šï¼Œä½†ä¿é™©ï¼‰
     cv::threshold(maskB, maskB, 127, 255, cv::THRESH_BINARY);
 
     if (dilateR > 0)
@@ -236,7 +236,7 @@ cv::Mat AlignToReference::WarpMask_AtoB(
     return maskB;
 }
 
-// ¹¤¾ßº¯Êı£ºQList<QPointF> -> std::vector<cv::Point2f>
+// å·¥å…·å‡½æ•°ï¼šQList<QPointF> -> std::vector<cv::Point2f>
 std::vector<cv::Point2f> AlignToReference::qListToCvVec(const QList<QPointF>& points) const
 {
     std::vector<cv::Point2f> cvPoints;
@@ -249,7 +249,7 @@ std::vector<cv::Point2f> AlignToReference::qListToCvVec(const QList<QPointF>& po
     return cvPoints;
 }
 
-// ¹¤¾ßº¯Êı£ºstd::vector<cv::Point2f> -> QList<QPointF>
+// å·¥å…·å‡½æ•°ï¼šstd::vector<cv::Point2f> -> QList<QPointF>
 QList<QPointF> AlignToReference::cvVecToQList(const std::vector<cv::Point2f>& points) const
 {
     QList<QPointF> qPoints;
@@ -282,40 +282,40 @@ QImage AlignToReference::GrayMatToQImage(const cv::Mat& gray)  const
 
 QImage AlignToReference::MakeMaskFor(const QImage& imgB, QList<QPointF>* ptsOutB, QRectF* rectOutB, bool* bOk) const
 {
-    // 0. ³õÊ¼»¯Óë°²È«¼ì²é
+    // 0. åˆå§‹åŒ–ä¸å®‰å…¨æ£€æŸ¥
     if (bOk) *bOk = false;
     if (!ready_ || imgB.isNull()) return QImage();
 
-    // ½« Qt Í¼Ïñ×ª»»Îª OpenCV ¸ñÊ½½øĞĞ¼ÆËã
+    // å°† Qt å›¾åƒè½¬æ¢ä¸º OpenCV æ ¼å¼è¿›è¡Œè®¡ç®—
     cv::Mat bgrB = QImageToBgrMat(imgB);
     cv::Mat grayB = ToGray(bgrB);
 
-    // 1. ÌØÕ÷Æ¥ÅäÓë±ä»»¾ØÕó¼ÆËã
-    cv::Mat M_B2A;                                                                  // ´æ´¢´Óµ±Ç°Í¼ B µ½»ù×¼Í¼ A µÄ·ÂÉä±ä»»¾ØÕó
+    // 1. ç‰¹å¾åŒ¹é…ä¸å˜æ¢çŸ©é˜µè®¡ç®—
+    cv::Mat M_B2A;                                                                  // å­˜å‚¨ä»å½“å‰å›¾ B åˆ°åŸºå‡†å›¾ A çš„ä»¿å°„å˜æ¢çŸ©é˜µ
     int inliers = 0;
     if (!EstimateAffine_B2A(grayB, M_B2A, inliers))
     {
-        return QImage();                                                            // Èç¹ûÆ¥ÅäÌØÕ÷µã²»×ã£¬ÔòÎŞ·¨½¨Á¢¿Õ¼ä¶ÔÓ¦¹ØÏµ£¬Ö±½ÓÌø¹ı
+        return QImage();                                                            // å¦‚æœåŒ¹é…ç‰¹å¾ç‚¹ä¸è¶³ï¼Œåˆ™æ— æ³•å»ºç«‹ç©ºé—´å¯¹åº”å…³ç³»ï¼Œç›´æ¥è·³è¿‡
     }
 
-    // 2. ±êÇ©×ø±êÍ¶Ó° (Label Transformation)
+    // 2. æ ‡ç­¾åæ ‡æŠ•å½± (Label Transformation)
     if (ptsOutB)
     {
-        // a. ÀûÓÃ M_B2A µÄÄæ¾ØÕó£¬ÔÚ OpenCV ¿Õ¼äÄÚÍê³É×ø±ê±ä»»
+        // a. åˆ©ç”¨ M_B2A çš„é€†çŸ©é˜µï¼Œåœ¨ OpenCV ç©ºé—´å†…å®Œæˆåæ ‡å˜æ¢
         std::vector<cv::Point2f> ptsCvB = TransformPoints_AtoB(M_B2A);
 
-        // b. ½«±ä»»ºóµÄ OpenCV ×ø±ê×ª»»»Ø Qt µÄ QList ¸ñÊ½£¬¹©Íâ²¿±£´æ±êÇ©Ê¹ÓÃ
+        // b. å°†å˜æ¢åçš„ OpenCV åæ ‡è½¬æ¢å› Qt çš„ QList æ ¼å¼ï¼Œä¾›å¤–éƒ¨ä¿å­˜æ ‡ç­¾ä½¿ç”¨
         *ptsOutB = cvVecToQList(ptsCvB);
     }
 
-    // 3. ×Ô¶¯¼ÆËãËõ·Å¡¢Æ½ÒÆºóµÄ´ó¿ò (Bounding Box)
+    // 3. è‡ªåŠ¨è®¡ç®—ç¼©æ”¾ã€å¹³ç§»åçš„å¤§æ¡† (Bounding Box)
     if (rectOutB && !refRectA_.isNull())
     {
-        // a. Çó A µ½ B µÄÄæ¾ØÕó£¨°Ñ A ÉÏµÄ¿òÓ³Éäµ½ B ÉÏ£©
+        // a. æ±‚ A åˆ° B çš„é€†çŸ©é˜µï¼ˆæŠŠ A ä¸Šçš„æ¡†æ˜ å°„åˆ° B ä¸Šï¼‰
         cv::Mat M_A2B;
         cv::invertAffineTransform(M_B2A, M_A2B);
 
-        // b. ÌáÈ¡»ù×¼¿òµÄ 4 ¸ö½Çµã
+        // b. æå–åŸºå‡†æ¡†çš„ 4 ä¸ªè§’ç‚¹
         std::vector<cv::Point2f> cornersA = {
             cv::Point2f(refRectA_.left(), refRectA_.top()),
             cv::Point2f(refRectA_.right(), refRectA_.top()),
@@ -323,23 +323,23 @@ QImage AlignToReference::MakeMaskFor(const QImage& imgB, QList<QPointF>* ptsOutB
             cv::Point2f(refRectA_.left(), refRectA_.bottom())
         };
 
-        // c. ÓÃ·ÂÉäÄæ¾ØÕó°ÑÕâ 4 ¸ö½ÇµãÍ¶Ó°µ½Ä¿±êÍ¼ B ÉÏ
+        // c. ç”¨ä»¿å°„é€†çŸ©é˜µæŠŠè¿™ 4 ä¸ªè§’ç‚¹æŠ•å½±åˆ°ç›®æ ‡å›¾ B ä¸Š
         std::vector<cv::Point2f> cornersB;
         cv::transform(cornersA, cornersB, M_A2B);
 
-        // d. Çó±ä»»ºóµÄ 4 ¸öµãÔÚ B Í¼ÉÏµÄ¡°×îĞ¡Õı½»Íâ½Ó¾ØĞÎ¡±
+        // d. æ±‚å˜æ¢åçš„ 4 ä¸ªç‚¹åœ¨ B å›¾ä¸Šçš„â€œæœ€å°æ­£äº¤å¤–æ¥çŸ©å½¢â€
         cv::Rect cvRectB = cv::boundingRect(cornersB);
 
-        // e. ×ª»»»Ø Qt µÄ QRectF ¸ñÊ½
+        // e. è½¬æ¢å› Qt çš„ QRectF æ ¼å¼
         *rectOutB = QRectF(cvRectB.x, cvRectB.y, cvRectB.width, cvRectB.height);
     }
 
-    // 4. ÑÚÂëÍ¼¶ÔÆë±ä»» (Mask Warping)
-    // ½«»ù×¼Í¼µÄ MaskA Ó¦ÓÃ·ÂÉä±ä»»£¬Éú³É¸²¸ÇÔÚµ±Ç°Í¼ B ÉÏµÄ MaskB
-    // p_.dilateR ÓÃÓÚ¶ÔÉú³ÉµÄÕÚÕÖ½øĞĞÅòÕÍ´¦Àí£¬È·±£ÍêÈ«¸Ç×¡ÌùÖ½±ßÔµ
+    // 4. æ©ç å›¾å¯¹é½å˜æ¢ (Mask Warping)
+    // å°†åŸºå‡†å›¾çš„ MaskA åº”ç”¨ä»¿å°„å˜æ¢ï¼Œç”Ÿæˆè¦†ç›–åœ¨å½“å‰å›¾ B ä¸Šçš„ MaskB
+    // p_.dilateR ç”¨äºå¯¹ç”Ÿæˆçš„é®ç½©è¿›è¡Œè†¨èƒ€å¤„ç†ï¼Œç¡®ä¿å®Œå…¨ç›–ä½è´´çº¸è¾¹ç¼˜
     cv::Mat maskB = WarpMask_AtoB(refMaskA_, M_B2A, grayB.size(), p_.dilateR);
 
-    // 5. ·µ»Ø½á¹û
+    // 5. è¿”å›ç»“æœ
     if (bOk) *bOk = true;
     return GrayMatToQImage(maskB);
 }

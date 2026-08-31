@@ -1,4 +1,4 @@
-#ifndef THREADPOOL_H
+ï»¿#ifndef THREADPOOL_H
 #define THREADPOOL_H
 
 #include <QObject>
@@ -24,30 +24,30 @@ public:
 	QSharedPointer<WorkerThread> GetThread();
 
 public:
-	// ÖÕ¼«·ºĞÍ·Ö·¢ÒıÇæ£º×Ô¶¯´¦ÀíÏß³Ì»ñÈ¡¡¢ÉúÃüÖÜÆÚ±£³ÖÓë¿çÏß³ÌÌøÔ¾
+	// ç»ˆææ³›å‹åˆ†å‘å¼•æ“ï¼šè‡ªåŠ¨å¤„ç†çº¿ç¨‹è·å–ã€ç”Ÿå‘½å‘¨æœŸä¿æŒä¸è·¨çº¿ç¨‹è·³è·ƒ
 	template<typename TaskFunc>
 	void DispatchToWorker(TaskFunc&& task)
 	{
-		// 1. »ñÈ¡Ïß³ÌÖÇÄÜÖ¸Õë£¨±ØĞë°´Öµ²¶»ñÒÔÑÓ³¤ÉúÃüÖÜÆÚ£©
+		// 1. è·å–çº¿ç¨‹æ™ºèƒ½æŒ‡é’ˆï¼ˆå¿…é¡»æŒ‰å€¼æ•è·ä»¥å»¶é•¿ç”Ÿå‘½å‘¨æœŸï¼‰
 		auto thread = GetThread();
 		if (!thread) return;
 
-		// 2. »ñÈ¡Ä¿±ê×ÓÏß³ÌµÄÃªµã
+		// 2. è·å–ç›®æ ‡å­çº¿ç¨‹çš„é”šç‚¹
 		QObject* dispatcher = thread->Dispatcher();
 		if (!dispatcher) return;
 
-		// 3. ¿çÏß³ÌÊ±¿ÕÌøÔ¾£¬²¢ÔÚ×ÓÏß³ÌÖĞ½â°üÖ´ĞĞÕæÕıµÄÈÎÎñ
+		// 3. è·¨çº¿ç¨‹æ—¶ç©ºè·³è·ƒï¼Œå¹¶åœ¨å­çº¿ç¨‹ä¸­è§£åŒ…æ‰§è¡ŒçœŸæ­£çš„ä»»åŠ¡
 		QMetaObject::invokeMethod(dispatcher, [thread, func = std::forward<TaskFunc>(task)]() mutable
 			{
-				// ±àÒëÆÚ·ÖÖ§ÅĞ¶Ï
-				// ÅĞ¶Ï func ÊÇ·ñ¿ÉÒÔ½ÓÊÜ WorkerThread* ÀàĞÍµÄ²ÎÊı
+				// ç¼–è¯‘æœŸåˆ†æ”¯åˆ¤æ–­
+				// åˆ¤æ–­ func æ˜¯å¦å¯ä»¥æ¥å— WorkerThread* ç±»å‹çš„å‚æ•°
 				if constexpr (std::is_invocable_v<TaskFunc, WorkerThread*>)
 				{
-					func(thread.data());																	// Èç¹û¿ÉÒÔ£¬¾Í°ÑÏß³ÌÖ¸Õë´«½øÈ¥£¨ÊÊºÏĞèÒª»ñÈ¡Ïß³ÌÉÏÏÂÎÄµÄÈÎÎñ£©
+					func(thread.data());																	// å¦‚æœå¯ä»¥ï¼Œå°±æŠŠçº¿ç¨‹æŒ‡é’ˆä¼ è¿›å»ï¼ˆé€‚åˆéœ€è¦è·å–çº¿ç¨‹ä¸Šä¸‹æ–‡çš„ä»»åŠ¡ï¼‰
 				}
 				else
 				{
-					func();																					// Èç¹û²»¿ÉÒÔ£¬¾ÍÖ±½ÓÖ´ĞĞ£¨ÊÊºÏÏñ TCPMgr::Instance() ÕâÖÖÈÎÎñ£©
+					func();																					// å¦‚æœä¸å¯ä»¥ï¼Œå°±ç›´æ¥æ‰§è¡Œï¼ˆé€‚åˆåƒ TCPMgr::Instance() è¿™ç§ä»»åŠ¡ï¼‰
 				}
 			}, Qt::QueuedConnection);
 	}

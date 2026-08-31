@@ -1,4 +1,4 @@
-#ifndef LAMA_ORT_H
+ï»¿#ifndef LAMA_ORT_H
 #define LAMA_ORT_H
 
 #include <onnxruntime_cxx_api.h>
@@ -34,13 +34,13 @@ private:
 
     QImage ScaleIgnoreAspect(const QImage& img, int w, int h, Qt::TransformationMode mode);
 
-    void BinarizeInPlace(QImage& gray8, int thresh = 127);                                      // Í¼Ïñ¶şÖµ»¯
-    QImage DilateGray8(const QImage& binGray8, int radius);                                     // Í¼ÏñÅòÕÍ
+    void BinarizeInPlace(QImage& gray8, int thresh = 127);                                      // å›¾åƒäºŒå€¼åŒ–
+    QImage DilateGray8(const QImage& binGray8, int radius);                                     // å›¾åƒè†¨èƒ€
 
-    void MaskToFloatHW(const QImage& binGray8, std::vector<float>& outHW);                      // ×ª»»³É¸¡µãÊı×é
+    void MaskToFloatHW(const QImage& binGray8, std::vector<float>& outHW);                      // è½¬æ¢æˆæµ®ç‚¹æ•°ç»„
     void ImageToFloatCHW_HoleZero01(const QImage& rgb32_512, 
         const std::vector<float>& maskHW,
-        std::vector<float>& outCHW);                                                            // 0..1£¬¶´ÇøÖÃ0
+        std::vector<float>& outCHW);                                                            // 0..1ï¼Œæ´åŒºç½®0
 
     std::vector<Ort::Value> RunOrt(const std::vector<float>& imageCHW,
         const std::vector<float>& maskHW,
@@ -51,17 +51,17 @@ private:
 
     QImage CompositeByMask(const QImage& baseRgb32,
         const QImage& fillRgb32,
-        const QImage& binMaskGray8);                                                            // 255=¶´
+        const QImage& binMaskGray8);                                                            // 255=æ´
 
     QImage CompositeByMaskScaledUp(const QImage& baseOrigRgb32,
         const QImage& fill512Rgb32,
-        const QImage& maskOrigGray8);                                                           // ¹Ì¶¨512ÍÆÀíµÄ×îÖÕºÏ³É£¨Ô­³ß´ç£©
+        const QImage& maskOrigGray8);                                                           // å›ºå®š512æ¨ç†çš„æœ€ç»ˆåˆæˆï¼ˆåŸå°ºå¯¸ï¼‰
 
 private:
     Ort::Env env_;
     Ort::Session session_{ nullptr };
 
-    // ÓÃ string ¹ÜÀíÄÚ´æ£¬ÔÙ°Ñ c_str() Ìá¹©¸ø ORT
+    // ç”¨ string ç®¡ç†å†…å­˜ï¼Œå†æŠŠ c_str() æä¾›ç»™ ORT
     std::vector<std::string> inputNameStr_;
     std::vector<std::string> outputNameStr_;
     std::vector<const char*> inputNames_;

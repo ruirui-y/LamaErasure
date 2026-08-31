@@ -1,4 +1,4 @@
-#include "LamaOrt.h"
+ï»¿#include "LamaOrt.h"
 
 #include "ConfigReader.h"
 #include <algorithm>
@@ -57,7 +57,7 @@ void LamaOrt::BinarizeInPlace(QImage& gray8, int thresh)
     }
 }
 
-// ¼ì²â3*3ÁÚÓò(radius = 1)
+// æ£€æµ‹3*3é‚»åŸŸ(radius = 1)
 QImage LamaOrt::DilateGray8(const QImage& binGray8, int radius)
 {
     if (radius <= 0) return binGray8;
@@ -122,7 +122,7 @@ void LamaOrt::ImageToFloatCHW_HoleZero01(const QImage& rgb32_512,
             const int hw = y * W + x;
             const bool hole = (maskHW[size_t(hw)] > 0.5f);
 
-            // Èç¹ûÊÇ¶´£¬¶¼ÉèÖÃ³É0
+            // å¦‚æœæ˜¯æ´ï¼Œéƒ½è®¾ç½®æˆ0
             const QRgb px = row[x];
             const float r = hole ? 0.0f : (float(qRed(px)) / 255.0f);
             const float g = hole ? 0.0f : (float(qGreen(px)) / 255.0f);
@@ -221,14 +221,14 @@ QImage LamaOrt::CompositeByMaskScaledUp(const QImage& baseOrigRgb32,
     const int origW = baseOrigRgb32.width();
     const int origH = baseOrigRgb32.height();
 
-    // Ô­³ß´ç mask ¶şÖµ»¯
+    // åŸå°ºå¯¸ mask äºŒå€¼åŒ–
     QImage mOrigBin = maskOrigGray8.convertToFormat(QImage::Format_Grayscale8);
     BinarizeInPlace(mOrigBin, 127);
 
-    // 512½á¹û·Å´ó»ØÔ­³ß´ç
+    // 512ç»“æœæ”¾å¤§å›åŸå°ºå¯¸
     QImage fillUp = ScaleIgnoreAspect(fill512Rgb32, origW, origH, Qt::SmoothTransformation);
 
-    // Ô­³ß´çºÏ³É£¨¶´ÇøÓÃ fillUp£¬·Ç¶´Çø±£ÁôÔ­Í¼£©
+    // åŸå°ºå¯¸åˆæˆï¼ˆæ´åŒºç”¨ fillUpï¼Œéæ´åŒºä¿ç•™åŸå›¾ï¼‰
     return CompositeByMask(baseOrigRgb32, fillUp, mOrigBin);
 }
 
@@ -240,27 +240,27 @@ QImage LamaOrt::processCore(const QImage& src, const QImage& mask)
     const int origH = src.height();
     const int W = 512, H = 512;
 
-    // 1) Ô­Í¼Í³Ò»¸ñÊ½£¨Ô­³ß´ç£©
+    // 1) åŸå›¾ç»Ÿä¸€æ ¼å¼ï¼ˆåŸå°ºå¯¸ï¼‰
     QImage srcOrig = ToRgb32(src);
     QImage mOrig = ToGray8(mask);
 
-    // 2) Ëõ·Åµ½ 512 ×÷ÎªÍÆÀíÊäÈë
+    // 2) ç¼©æ”¾åˆ° 512 ä½œä¸ºæ¨ç†è¾“å…¥
     QImage img512 = ScaleIgnoreAspect(srcOrig, W, H, Qt::SmoothTransformation);
     QImage m512 = ScaleIgnoreAspect(mOrig, W, H, Qt::FastTransformation);
 
-    // 3) mask ¶şÖµ»¯ + ÇáÎ¢ÅòÕÍ£¨¸²¸Ç±ßÔµ²ĞÁô£©
+    // 3) mask äºŒå€¼åŒ– + è½»å¾®è†¨èƒ€ï¼ˆè¦†ç›–è¾¹ç¼˜æ®‹ç•™ï¼‰
     BinarizeInPlace(m512, 127);
     const int dilateR = 4;
     if (dilateR > 0) m512 = DilateGray8(m512, dilateR);
 
-    // 4) ×¼±¸ÊäÈëÕÅÁ¿
+    // 4) å‡†å¤‡è¾“å…¥å¼ é‡
     std::vector<float> maskHW;
     MaskToFloatHW(m512, maskHW);
 
     std::vector<float> imageCHW;
     ImageToFloatCHW_HoleZero01(img512, maskHW, imageCHW);
 
-    // 5) ORT ÍÆÀí
+    // 5) ORT æ¨ç†
     auto outputs = RunOrt(imageCHW, maskHW, W, H);
     if (outputs.empty()) return QImage();
 
@@ -271,15 +271,15 @@ QImage LamaOrt::processCore(const QImage& src, const QImage& mask)
     // 6) out(CHW) -> RGB32(512)
     QImage out512 = OutCHWToRgb32(out, W, H, out01);
 
-    // 7) ÏÈÔÚ 512 ÉÏºÏ³É£¨¶´ÇøÓÃ out£¬·Ç¶´ÇøÓÃ img512£©
+    // 7) å…ˆåœ¨ 512 ä¸Šåˆæˆï¼ˆæ´åŒºç”¨ outï¼Œéæ´åŒºç”¨ img512ï¼‰
     QImage final512 = CompositeByMask(img512, out512, m512);
 
-    // 8) »¹Ô­Ô­³ß´ç²¢ÓÃ¡°Ô­³ß´ç mask¡±ÔÙºÏ³ÉÒ»´Î
+    // 8) è¿˜åŸåŸå°ºå¯¸å¹¶ç”¨â€œåŸå°ºå¯¸ maskâ€å†åˆæˆä¸€æ¬¡
     // return CompositeByMaskScaledUp(srcOrig, final512, mOrig);
 
-    // ½«»Øµ÷·ÅÔÚ½ÓÊÜÕßÏß³ÌÖĞ×ö²Ù×÷
+    // å°†å›è°ƒæ”¾åœ¨æ¥å—è€…çº¿ç¨‹ä¸­åšæ“ä½œ
 
-    // 8) »¹Ô­Ô­³ß´ç
+    // 8) è¿˜åŸåŸå°ºå¯¸
     QImage result = ScaleIgnoreAspect(final512, src.width(), src.height(), Qt::SmoothTransformation);
     return result;
 }
@@ -292,10 +292,10 @@ QImage LamaOrt::Run(const QImage& src, const QImage& mask)
 
 void LamaOrt::RunAsync(const QImage& src, const QImage& mask, ImageCallback cb)
 {
-    // ÔÚµ±Ç°Ïß³ÌÖ´ĞĞ²Á³ı
+    // åœ¨å½“å‰çº¿ç¨‹æ‰§è¡Œæ“¦é™¤
     QImage result = processCore(src, mask);
 
-    // Ïß³Ì°²È«µÄ»Øµ÷·Ö·¢
+    // çº¿ç¨‹å®‰å…¨çš„å›è°ƒåˆ†å‘
     QObject* context = sender();
     if (!context) context = this->parent();
 

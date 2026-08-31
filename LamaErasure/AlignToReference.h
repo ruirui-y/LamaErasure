@@ -1,4 +1,4 @@
-#ifndef ALIGNTOREFERENCE_H
+ï»¿#ifndef ALIGNTOREFERENCE_H
 #define ALIGNTOREFERENCE_H
 
 #include <QImage>
@@ -12,21 +12,21 @@ public:
     using Ptr = std::shared_ptr<AlignToReference>;
     struct Params
     {
-        int   maxFeatures = 2000;                                                               // ORBÌØÕ÷ÊıÁ¿
+        int   maxFeatures = 2000;                                                               // ORBç‰¹å¾æ•°é‡
         float ratioTest = 0.75f;                                                                // Lowe ratio
-        int   minInliers = 20;                                                                  // µÍÓÚÕâ¸öÈÏÎª¶ÔÆëÊ§°Ü
-        double ransacReprojThreshold = 3.0;                                                     // RANSACãĞÖµ(ÏñËØ)
-        int   dilateR = 2;                                                                      // Éú³ÉmaskBºóÅòÕÍÒ»ÏÂ(·À±ßÔµ²ĞÁô)
+        int   minInliers = 20;                                                                  // ä½äºè¿™ä¸ªè®¤ä¸ºå¯¹é½å¤±è´¥
+        double ransacReprojThreshold = 3.0;                                                     // RANSACé˜ˆå€¼(åƒç´ )
+        int   dilateR = 2;                                                                      // ç”ŸæˆmaskBåè†¨èƒ€ä¸€ä¸‹(é˜²è¾¹ç¼˜æ®‹ç•™)
     };
 
 public:
     AlignToReference();
 
-    // ÉèÖÃ»ù×¼Í¼ A Óë maskA£¨maskA±ØĞëºÍAÍ¬³ß´ç£©
+    // è®¾ç½®åŸºå‡†å›¾ A ä¸ maskAï¼ˆmaskAå¿…é¡»å’ŒAåŒå°ºå¯¸ï¼‰
     bool SetReference(const QImage& refRgb, const QImage& refMaskGray, QList<QPointF> labelPoints, const QRectF& refRect, const Params& p);
 
-    // ¸øÒ»ÕÅ B£¬·µ»Ø¶ÔÆëºóµÄ maskB£¨ÓëBÍ¬³ß´ç£©
-    // bOk=false ±íÊ¾¶ÔÆëÊ§°Ü£¨Äã¿ÉÑ¡Ôñ·µ»Ø¿Õmask»òÖ±½ÓÌø¹ı£©
+    // ç»™ä¸€å¼  Bï¼Œè¿”å›å¯¹é½åçš„ maskBï¼ˆä¸BåŒå°ºå¯¸ï¼‰
+    // bOk=false è¡¨ç¤ºå¯¹é½å¤±è´¥ï¼ˆä½ å¯é€‰æ‹©è¿”å›ç©ºmaskæˆ–ç›´æ¥è·³è¿‡ï¼‰
     QImage MakeMaskFor(const QImage& imgB, QList<QPointF>* ptsOutB, QRectF* rectOutB, bool* bOk = nullptr) const;
 
     bool IsReady() const { return ready_; }
@@ -34,8 +34,8 @@ public:
 private:
     bool ComputeOrb(const cv::Mat& gray, std::vector<cv::KeyPoint>& kps, cv::Mat& desc) const;
 
-    bool EstimateAffine_B2A(const cv::Mat& grayB, cv::Mat& M_B2A, int& outInliers) const;       // ¹ÀËã·ÂÉä
-    std::vector<cv::Point2f> TransformPoints_AtoB(const cv::Mat& M_B2A) const;                  // ½«»ù×¼Í¼AÉÏµÄµã×ª»»µ½Í¼ÏñBµÄ×ø±êÏµÉÏ
+    bool EstimateAffine_B2A(const cv::Mat& grayB, cv::Mat& M_B2A, int& outInliers) const;       // ä¼°ç®—ä»¿å°„
+    std::vector<cv::Point2f> TransformPoints_AtoB(const cv::Mat& M_B2A) const;                  // å°†åŸºå‡†å›¾Aä¸Šçš„ç‚¹è½¬æ¢åˆ°å›¾åƒBçš„åæ ‡ç³»ä¸Š
     static cv::Mat ToGray(const cv::Mat& bgr);
     static cv::Mat ToGrayMaskU8(const QImage& maskGray);
 
@@ -56,10 +56,10 @@ private:
     bool ready_ = false;
 
     // Reference A
-    cv::Mat refGrayA_;                                                                                      // »ù×¼Í¼
-    cv::Mat refMaskA_;                                                                                      // »ù×¼Í¼¶ÔÓ¦µÄmask
-    std::vector<cv::Point2f> refPointsA_;                                                                   // ´æ´¢»ù×¼Í¼ A ÉÏµÄÑ¨Î»±êÇ©µã
-    QRectF refRectA_;                                                                                       // ´æ´¢»ù×¼Í¼ A ÉÏµÄ´ó¿ò
+    cv::Mat refGrayA_;                                                                                      // åŸºå‡†å›¾
+    cv::Mat refMaskA_;                                                                                      // åŸºå‡†å›¾å¯¹åº”çš„mask
+    std::vector<cv::Point2f> refPointsA_;                                                                   // å­˜å‚¨åŸºå‡†å›¾ A ä¸Šçš„ç©´ä½æ ‡ç­¾ç‚¹
+    QRectF refRectA_;                                                                                       // å­˜å‚¨åŸºå‡†å›¾ A ä¸Šçš„å¤§æ¡†
 
     std::vector<cv::KeyPoint> kpsA_;
     cv::Mat descA_;                                                                                         // ORB descriptors

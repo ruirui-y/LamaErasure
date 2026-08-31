@@ -1,4 +1,4 @@
-#include "AutoMask.h"
+ï»¿#include "AutoMask.h"
 #include <algorithm>
 #include <cmath>
 #include <QDebug>
@@ -35,28 +35,28 @@ QImage AutoMask::AutoMaskFromStickers(const QImage& srcRgb, MaskParams mask_para
 
     cv::Mat bgr = QImageToBgrMat(srcRgb);
 
-    // 1) HSV£ºÉ¸°×É«£¨µÍS + ¸ßV£©É«Ïà/±¥ºÍ¶È/ÁÁ¶È
+    // 1) HSVï¼šç­›ç™½è‰²ï¼ˆä½S + é«˜Vï¼‰è‰²ç›¸/é¥±å’Œåº¦/äº®åº¦
     cv::Mat hsv;
     cv::cvtColor(bgr, hsv, cv::COLOR_BGR2HSV);
 
-    // °×ÌùÖ½£ºS ºÜµÍ£¬V ºÜ¸ß
-    cv::Scalar lower(0, 0, 170);   // HËæ±ã£¬S<=60£¬V>=170
+    // ç™½è´´çº¸ï¼šS å¾ˆä½ï¼ŒV å¾ˆé«˜
+    cv::Scalar lower(0, 0, 170);   // Héšä¾¿ï¼ŒS<=60ï¼ŒV>=170
     cv::Scalar upper(180, 60, 255);
     cv::Mat bin;
     cv::inRange(hsv, lower, upper, bin);
 
-    // 2) ĞÎÌ¬Ñ§£ºÈ¥Ôë + Ìî¶´
+    // 2) å½¢æ€å­¦ï¼šå»å™ª + å¡«æ´
     cv::Mat k3 = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3));
     cv::Mat k5 = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5));
     cv::morphologyEx(bin, bin, cv::MORPH_OPEN, k3, cv::Point(-1, -1), 1);
     cv::morphologyEx(bin, bin, cv::MORPH_CLOSE, k5, cv::Point(-1, -1), 2);
 
-    // 3) ÕÒÂÖÀª
+    // 3) æ‰¾è½®å»“
     std::vector<std::vector<cv::Point>> contours;
     cv::findContours(bin, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
     qDebug() << "contours = " << contours.size();
 
-    // 4) ÂÖÀª ¡ú Ô²ºòÑ¡
+    // 4) è½®å»“ â†’ åœ†å€™é€‰
     std::vector<CircleCand> cands;
     cands.reserve(contours.size());
 
@@ -65,34 +65,34 @@ QImage AutoMask::AutoMaskFromStickers(const QImage& srcRgb, MaskParams mask_para
     for (auto& ct : contours) 
     {
         double area = cv::contourArea(ct);
-        if (area < 50) continue;                                                    // Ì«Ğ¡µÄÔëµã²»Òª£¨¿Éµ÷£©
+        if (area < 50) continue;                                                    // å¤ªå°çš„å™ªç‚¹ä¸è¦ï¼ˆå¯è°ƒï¼‰
 
         double peri = cv::arcLength(ct, true);
         if (peri <= 1e-6) continue;
 
-        // Ô²ĞÎ¶È£º1.0 ×îÔ²
+        // åœ†å½¢åº¦ï¼š1.0 æœ€åœ†
         double circularity = 4.0 * CV_PI * area / (peri * peri);
-        if (circularity < mask_params.circularity) continue;                        // ¿Éµ÷£º0.6~0.8
+        if (circularity < mask_params.circularity) continue;                        // å¯è°ƒï¼š0.6~0.8
 
         cv::Point2f c; float r;
         cv::minEnclosingCircle(ct, c, r);
 
-        // °ë¾¶·¶Î§¹ıÂË
+        // åŠå¾„èŒƒå›´è¿‡æ»¤
         if (r < mask_params.min_r || r > mask_params.max_r) continue;
 
-        // ÌùÖ½Ò»°ãÔÚÍ¼ÖĞ²¿Æ«ÉÏ
+        // è´´çº¸ä¸€èˆ¬åœ¨å›¾ä¸­éƒ¨åä¸Š
         if (c.x < 0 || c.y < 0 || c.x >= W || c.y >= H) continue;
 
-        // ´ò·Ö£ºÔ²ĞÎ¶È¸ß + Ãæ»ı´ó¸üÏñÌùÖ½
+        // æ‰“åˆ†ï¼šåœ†å½¢åº¦é«˜ + é¢ç§¯å¤§æ›´åƒè´´çº¸
         double score = circularity * std::sqrt(area);
         cands.push_back({ c, r, score });
     }
 
-    // Èç¹ûÃ»ÕÒµ½£¬·µ»ØÈ«ºÚ mask
+    // å¦‚æœæ²¡æ‰¾åˆ°ï¼Œè¿”å›å…¨é»‘ mask
     cv::Mat mask(H, W, CV_8UC1, cv::Scalar(0));
     if (cands.empty()) return GrayMatToQImage(mask);
 
-    // 5) È¡×îºÃµÄ 3 ¸ö
+    // 5) å–æœ€å¥½çš„ 3 ä¸ª
     std::sort(cands.begin(), cands.end(),
         [](const CircleCand& a, const CircleCand& b) { return a.score > b.score; });
 
@@ -104,7 +104,7 @@ QImage AutoMask::AutoMaskFromStickers(const QImage& srcRgb, MaskParams mask_para
         cv::circle(mask, cc.c, rr, cv::Scalar(255), -1, cv::LINE_AA);
     }
 
-    // 6) ÇáÎ¢ÅòÕÍ£¬·ÀÖ¹±ßÔµ²ĞÁô
+    // 6) è½»å¾®è†¨èƒ€ï¼Œé˜²æ­¢è¾¹ç¼˜æ®‹ç•™
     if (mask_params.marginPx > 0) {
         cv::Mat k = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5));
         cv::dilate(mask, mask, k, cv::Point(-1, -1), 1);

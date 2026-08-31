@@ -1,4 +1,4 @@
-#include "MainWindow.h"
+﻿#include "MainWindow.h"
 #include "ThreadPool.h"
 #include "Global.h"
 #include <QThread>

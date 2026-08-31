@@ -1,4 +1,4 @@
-#ifndef BATCHWORKER_H
+ï»¿#ifndef BATCHWORKER_H
 #define BATCHWORKER_H
 
 #include <QThread>
@@ -36,7 +36,7 @@ public slots:
     {
         if (!ort_) { emit finished(false, "ort_ is null"); return; }
 
-        // ÊÕ¼¯Í¼Æ¬
+        // æ”¶é›†å›¾ç‰‡
         QStringList filters = { "*.png","*.jpg","*.jpeg","*.bmp","*.tif","*.tiff","*.webp" };
         QDirIterator it(inDir_, filters, QDir::Files, QDirIterator::Subdirectories);
 
@@ -46,13 +46,13 @@ public slots:
         const int total = files.size();
         if (total == 0) { emit finished(false, "No images found."); return; }
 
-        // È·±£Êä³öÄ¿Â¼´æÔÚ
+        // ç¡®ä¿è¾“å‡ºç›®å½•å­˜åœ¨
         QDir().mkpath(outDir_);
         QDir().mkpath(labelDir_);
 
         for (int i = 0; i < total; ++i) 
         {
-            // 0. ÖĞ¶Ï¼ì²é
+            // 0. ä¸­æ–­æ£€æŸ¥
             if (cancel_ && cancel_->load()) 
             {
                 emit finished(true, "Canceled.");
@@ -62,7 +62,7 @@ public slots:
             const QString inPath = files[i];
             QFileInfo fi(inPath);
 
-            // 1. ¶ÁÈ¡Ô­Í¼
+            // 1. è¯»å–åŸå›¾
             QImageReader reader(inPath);
             reader.setAutoTransform(true);
             QImage img = reader.read();
@@ -72,7 +72,7 @@ public slots:
                 continue;
             }
 
-            // 2. ×Ô¶¯»¯¶ÔÆëÓë±êÇ©/ÑÚÂëÉú³É
+            // 2. è‡ªåŠ¨åŒ–å¯¹é½ä¸æ ‡ç­¾/æ©ç ç”Ÿæˆ
             bool ok = false;
             QList<QPointF> label_points;
             QRectF target_box;
@@ -82,19 +82,19 @@ public slots:
                 continue;
             }
 
-            // 3. ÑÚÂë³ß´çĞ£×¼
+            // 3. æ©ç å°ºå¯¸æ ¡å‡†
             if (maskForThis.size() != img.size()) {
                 maskForThis = maskForThis.scaled(img.size(), Qt::IgnoreAspectRatio, Qt::FastTransformation);
             }
 
-            // 4. AI ÍÆÀí²Á³ı (Lama Ìî³ä)
+            // 4. AI æ¨ç†æ“¦é™¤ (Lama å¡«å……)
             QImage out = ort_->Run(img, maskForThis);
             if (out.isNull()) {
                 emit progress(i + 1, total, fi.fileName() + " (inpaint failed)");
                 continue;
             }
 
-            // 5. ±£´æ²Á³ıºóµÄ¾»Í¼
+            // 5. ä¿å­˜æ“¦é™¤åçš„å‡€å›¾
             const QString outPath = QDir(outDir_).filePath(fi.fileName());
             QImageWriter writer(outPath);
             if (fi.suffix().toLower() == "jpg" || fi.suffix().toLower() == "jpeg") writer.setQuality(95);
@@ -104,7 +104,7 @@ public slots:
                 continue;
             }
 
-            // 6. ±£´æ¶ÔÓ¦µÄ YOLO ±êÇ©ÎÄ¼ş
+            // 6. ä¿å­˜å¯¹åº”çš„ YOLO æ ‡ç­¾æ–‡ä»¶
             QString labelPath = QDir(labelDir_).filePath(fi.baseName() + ".txt");
             saveYoloLabels(target_box, label_points, labelPath, img.size());
 

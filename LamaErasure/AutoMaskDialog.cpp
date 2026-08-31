@@ -1,4 +1,4 @@
-#include "AutoMaskDialog.h"
+﻿#include "AutoMaskDialog.h"
 #include "GlobalStruct.h"
 #include <QFormLayout>
 #include <QSpinBox>
@@ -59,7 +59,7 @@ AutoMaskDialog::AutoMaskDialog(QWidget* parent)
     connect(buttons_, &QDialogButtonBox::accepted, this, &QDialog::accept);
     connect(buttons_, &QDialogButtonBox::rejected, this, &QDialog::reject);
 
-    // СУ�飺min<=max
+    // 小校验：min<=max
     connect(spMinR_, qOverload<int>(&QSpinBox::valueChanged), this, [this](int v) {
         if (v > spMaxR_->value()) spMaxR_->setValue(v);
         });

@@ -1,4 +1,4 @@
-#ifndef SINGLETON_H
+ï»¿#ifndef SINGLETON_H
 #define SINGLETON_H
 
 #include <mutex>
@@ -6,7 +6,7 @@
 #include <iostream>
 #include <type_traits>
 
-// C++17 »·¾³ĞáÌ½Ä§·¨£º×Ô¶¯¼ì²âµ±Ç°¹¤³ÌÊÇ·ñÓĞ Qt »·¾³
+// C++17 ç¯å¢ƒå—…æ¢é­”æ³•ï¼šè‡ªåŠ¨æ£€æµ‹å½“å‰å·¥ç¨‹æ˜¯å¦æœ‰ Qt ç¯å¢ƒ
 #if defined(__has_include)
 #if __has_include(<QObject>) && __has_include(<QThread>)
 #define ENV_HAS_QT
@@ -33,15 +33,15 @@ public:
             {
                 try {
                     // ==============================================================================
-                    // Ö»ÓĞÔÚÕì²ìµ½ Qt »·¾³Ê±£¬±àÒëÆ÷²Å»á¿´Õâ¶Î´úÂë
+                    // åªæœ‰åœ¨ä¾¦å¯Ÿåˆ° Qt ç¯å¢ƒæ—¶ï¼Œç¼–è¯‘å™¨æ‰ä¼šçœ‹è¿™æ®µä»£ç 
 #ifdef ENV_HAS_QT
-                // ±àÒëÆÚÄ§·¨£ºÈç¹ûÔÚ Qt »·¾³ÏÂ£¬ÇÒ T ¼Ì³Ğ×Ô QObject
+                // ç¼–è¯‘æœŸé­”æ³•ï¼šå¦‚æœåœ¨ Qt ç¯å¢ƒä¸‹ï¼Œä¸” T ç»§æ‰¿è‡ª QObject
                     if constexpr (std::is_base_of_v<QObject, T>) {
-                        // Îª QObject ¶¨ÖÆµÄ¿çÏß³ÌÉ¾³ıÆ÷
+                        // ä¸º QObject å®šåˆ¶çš„è·¨çº¿ç¨‹åˆ é™¤å™¨
                         auto safeDeleter = [](T* obj) {
                             if (!obj) return;
                             QThread* objThread = obj->thread();
-                            // Ïß³ÌËÀÁË¾Í³£¹æ delete£¬Ïß³Ì»î×Å¾Í°²È«Í¶µİ deleteLater
+                            // çº¿ç¨‹æ­»äº†å°±å¸¸è§„ deleteï¼Œçº¿ç¨‹æ´»ç€å°±å®‰å…¨æŠ•é€’ deleteLater
                             if (!objThread || !objThread->isRunning() || objThread->isFinished()) {
                                 delete obj;
                             }
@@ -56,7 +56,7 @@ public:
 #endif
                         // ==============================================================================
                     {
-                        // ´¿ C++ ÀàµÄÄ¬ÈÏ´¦ÀíÂ·¾¶£¨ÎŞÂÛÓĞÃ»ÓĞ Qt£¬ÆÕÍ¨Àà¶¼×ßÕâÀï£©
+                        // çº¯ C++ ç±»çš„é»˜è®¤å¤„ç†è·¯å¾„ï¼ˆæ— è®ºæœ‰æ²¡æœ‰ Qtï¼Œæ™®é€šç±»éƒ½èµ°è¿™é‡Œï¼‰
                         m_pInstance = std::shared_ptr<T>(new T);
                     }
                 }

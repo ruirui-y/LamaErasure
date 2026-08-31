@@ -1,4 +1,4 @@
-#ifndef CONFIGREADER_H
+ï»¿#ifndef CONFIGREADER_H
 #define CONFIGREADER_H
 
 #include <QString>
@@ -10,25 +10,25 @@ class ConfigReader : public Singleton<ConfigReader>
 public:
     struct Paths
     {
-        QString iniPath;                                                        // Êµ¼ÊÊ¹ÓÃµÄ config.ini ¾ø¶ÔÂ·¾¶
-        QString onnxPath;                                                       // onnx Ä£ĞÍ¾ø¶ÔÂ·¾¶
-        QString inputDir;                                                       // ÊäÈëÄ¿Â¼¾ø¶ÔÂ·¾¶
-        QString outputDir;                                                      // Êä³öÄ¿Â¼¾ø¶ÔÂ·¾¶
-        QString lastOpenDir;                                                    // ×îºó´ò¿ªµÄÄ¿Â¼¾ø¶ÔÂ·¾¶
+        QString iniPath;                                                        // å®é™…ä½¿ç”¨çš„ config.ini ç»å¯¹è·¯å¾„
+        QString onnxPath;                                                       // onnx æ¨¡å‹ç»å¯¹è·¯å¾„
+        QString inputDir;                                                       // è¾“å…¥ç›®å½•ç»å¯¹è·¯å¾„
+        QString outputDir;                                                      // è¾“å‡ºç›®å½•ç»å¯¹è·¯å¾„
+        QString lastOpenDir;                                                    // æœ€åæ‰“å¼€çš„ç›®å½•ç»å¯¹è·¯å¾„
     };
 
 public:
-    // iniRelativeToApp: Ä¬ÈÏ "Config/config.ini"
+    // iniRelativeToApp: é»˜è®¤ "Config/config.ini"
     explicit ConfigReader(const QString& iniRelativeToApp = "Config/config.ini");
     
-    bool reload();                                                              // ÖØĞÂ¶ÁÈ¡ ini
-    bool isValid() const;                                                       // onnx Â·¾¶ÊÇ·ñ´æÔÚ£¨ÖÁÉÙÓĞÕâ¸ö£©
+    bool reload();                                                              // é‡æ–°è¯»å– ini
+    bool isValid() const;                                                       // onnx è·¯å¾„æ˜¯å¦å­˜åœ¨ï¼ˆè‡³å°‘æœ‰è¿™ä¸ªï¼‰
 
-    void setLastOpenDir(const QString& path);                                   // ÉèÖÃ×îºóÒ»´Î´ò¿ªµÄÂ·¾¶
-    const Paths& paths();                                                       // ¶ÁÈ¡µ½µÄÂ·¾¶
-    QString lastError() const;                                                  // ´íÎóĞÅÏ¢
+    void setLastOpenDir(const QString& path);                                   // è®¾ç½®æœ€åä¸€æ¬¡æ‰“å¼€çš„è·¯å¾„
+    const Paths& paths();                                                       // è¯»å–åˆ°çš„è·¯å¾„
+    QString lastError() const;                                                  // é”™è¯¯ä¿¡æ¯
 
-    // ·½±ã£º°Ñ ini Àï¶Áµ½µÄÏà¶ÔÂ·¾¶×ª¾ø¶ÔÂ·¾¶£¨Ïà¶Ô exe Ä¿Â¼£©
+    // æ–¹ä¾¿ï¼šæŠŠ ini é‡Œè¯»åˆ°çš„ç›¸å¯¹è·¯å¾„è½¬ç»å¯¹è·¯å¾„ï¼ˆç›¸å¯¹ exe ç›®å½•ï¼‰
     static QString resolvePathFromApp(const QString& p);
 
 private:

@@ -1,4 +1,4 @@
-#include "ConfigReader.h"
+ï»¿#include "ConfigReader.h"
 
 #include <QCoreApplication>
 #include <QDir>
@@ -51,7 +51,7 @@ bool ConfigReader::reload()
     paths_.outputDir = resolvePathFromApp(outDir);
     paths_.lastOpenDir = resolvePathFromApp(lastOpneDir);
 
-    // Ğ£Ñé£ºÖÁÉÙ onnx µÃ´æÔÚ
+    // æ ¡éªŒï¼šè‡³å°‘ onnx å¾—å­˜åœ¨
     QFileInfo onnxFi(paths_.onnxPath);
     if (!onnxFi.exists())
     {
@@ -59,7 +59,7 @@ bool ConfigReader::reload()
         return false;
     }
 
-    // ÊäÈë/Êä³öÄ¿Â¼²»´æÔÚ¾Í´´½¨
+    // è¾“å…¥/è¾“å‡ºç›®å½•ä¸å­˜åœ¨å°±åˆ›å»º
     QDir().mkpath(paths_.inputDir);
     QDir().mkpath(paths_.outputDir);
 
@@ -87,12 +87,12 @@ void ConfigReader::setLastOpenDir(const QString& path)
     if (path.isEmpty()) return;
     QString cleanPath = QDir::toNativeSeparators(path);
     
-    // 1. Ğ´ÈëÅäÖÃÎÄ¼ş
+    // 1. å†™å…¥é…ç½®æ–‡ä»¶
     QSettings ini(iniPath_, QSettings::IniFormat);
     ini.setIniCodec("UTF-8");
     ini.setValue("Paths/lastopendir", path);
-    ini.sync();                                                                 // Ç¿ÖÆÁ¢¼´Ğ´Èë´ÅÅÌ
+    ini.sync();                                                                 // å¼ºåˆ¶ç«‹å³å†™å…¥ç£ç›˜
 
-    // 2. Í¬²½¸üĞÂÄÚ´æÖĞµÄÊı¾İ£¬±ÜÃâÏÂ´Î reload Ö®Ç°Êı¾İ²»Ò»ÖÂ
+    // 2. åŒæ­¥æ›´æ–°å†…å­˜ä¸­çš„æ•°æ®ï¼Œé¿å…ä¸‹æ¬¡ reload ä¹‹å‰æ•°æ®ä¸ä¸€è‡´
     paths_.lastOpenDir = path;
 }

@@ -1,4 +1,4 @@
-#include "WorkerThread.h"
+ï»¿#include "WorkerThread.h"
 #include <QDebug>
 
 void WorkerThread::run()
@@ -11,6 +11,6 @@ void WorkerThread::run()
 
     exec();
 
-    // ÍË³öÊÂ¼şÑ­»·ºó dispatcher ¼´½«Ïú»Ù
+    // é€€å‡ºäº‹ä»¶å¾ªç¯å dispatcher å³å°†é”€æ¯
     dispatcher_.store(nullptr, std::memory_order_release);
 }

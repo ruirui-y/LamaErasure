@@ -1,4 +1,4 @@
-#ifndef INPAINT_CANVAS_H
+ï»¿#ifndef INPAINT_CANVAS_H
 #define INPAINT_CANVAS_H
 #include <QGraphicsView>
 #include <QGraphicsPixmapItem>
@@ -6,7 +6,7 @@
 #include <QPoint>
 
 /*
-* »­²¼Ãæ°å
+* ç”»å¸ƒé¢æ¿
 */
 
 class InpaintCanvas : public QGraphicsView 
@@ -16,7 +16,7 @@ public:
     explicit InpaintCanvas(QWidget* parent = nullptr);
 
     bool loadImage(const QString& file);
-    void setImage(const QImage& img);                                   // ÉèÖÃµ±Ç°ÏÔÊ¾Í¼£¨²¢ÖØÖÃmask£©
+    void setImage(const QImage& img);                                   // è®¾ç½®å½“å‰æ˜¾ç¤ºå›¾ï¼ˆå¹¶é‡ç½®maskï¼‰
     void setMask(const QImage& maskGray);
     void clearMask();
 
@@ -26,8 +26,8 @@ public:
     void setBrushRadius(int r) { brushRadius_ = qMax(1, r); }
     int  brushRadius() const { return brushRadius_; }
 
-    QList<QPointF> labelPoints() const { return labelPoints_; }         // »­µÄµãµÄ×ø±ê
-    QRectF boundingBox() const { return boundingBox_; }                 // »­µÄ¿òµÄ×ø±ê
+    QList<QPointF> labelPoints() const { return labelPoints_; }         // ç”»çš„ç‚¹çš„åæ ‡
+    QRectF boundingBox() const { return boundingBox_; }                 // ç”»çš„æ¡†çš„åæ ‡
 
 signals:
     void maskChanged();
@@ -35,7 +35,7 @@ signals:
 
 protected:
     void mousePressEvent(QMouseEvent* e) override;
-    void mouseMoveEvent(QMouseEvent* e) override;                       // »­¿ò
+    void mouseMoveEvent(QMouseEvent* e) override;                       // ç”»æ¡†
     void mouseReleaseEvent(QMouseEvent* e) override;
     void wheelEvent(QWheelEvent* e) override;
     void resizeEvent(QResizeEvent* e) override;
@@ -50,21 +50,21 @@ private:
     QGraphicsScene* scene_ = nullptr;
     QGraphicsPixmapItem* itemImg_ = nullptr;
     QGraphicsPixmapItem* itemMask_ = nullptr;
-    QGraphicsRectItem* itemRect_ = nullptr;                             // ÓÃÓÚÔÚ»­²¼ÉÏÏÔÊ¾ÂÌÉ«µÄÊ¸Á¿¿ò
+    QGraphicsRectItem* itemRect_ = nullptr;                             // ç”¨äºåœ¨ç”»å¸ƒä¸Šæ˜¾ç¤ºç»¿è‰²çš„çŸ¢é‡æ¡†
 
     QImage src_;                                                        // RGB888
     QImage mask_;                                                       // Grayscale8 (0=keep, 255=hole)
 
     bool drawing_ = false;
     int brushRadius_ = 25;
-    bool rightErase_ = true;                                            // ÓÒ¼ü²Á³ı
+    bool rightErase_ = true;                                            // å³é”®æ“¦é™¤
     qreal zoom_ = 1.0;
-    QList<QPointF> labelPoints_;                                        // ¼ÇÂ¼Ñ¨Î»ÖĞĞÄµãµÄÊı×é
+    QList<QPointF> labelPoints_;                                        // è®°å½•ç©´ä½ä¸­å¿ƒç‚¹çš„æ•°ç»„
 
-    // ¼ÇÂ¼¿òµÄÊı¾İºÍ»­¿ò×´Ì¬
-    QRectF boundingBox_;                                                // ±£´æÕæÕıµÄ¿ò×ø±ê
-    bool isDraggingBox_ = false;                                        // ÊÇ·ñÕıÔÚ»­¿ò
-    QPointF boxStartPos_;                                               // »­¿òµÄÆğµã
+    // è®°å½•æ¡†çš„æ•°æ®å’Œç”»æ¡†çŠ¶æ€
+    QRectF boundingBox_;                                                // ä¿å­˜çœŸæ­£çš„æ¡†åæ ‡
+    bool isDraggingBox_ = false;                                        // æ˜¯å¦æ­£åœ¨ç”»æ¡†
+    QPointF boxStartPos_;                                               // ç”»æ¡†çš„èµ·ç‚¹
 };
 
 #endif // INPAINT_CANVAS_H

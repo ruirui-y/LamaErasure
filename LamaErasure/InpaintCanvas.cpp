@@ -1,4 +1,4 @@
-#include "InpaintCanvas.h"
+ï»¿#include "InpaintCanvas.h"
 #include <QGraphicsScene>
 #include <QMouseEvent>
 #include <QWheelEvent>
@@ -13,7 +13,7 @@ static QImage makeMaskOverlayRGBA(const QImage& maskGray, int alpha = 120)
     QPainter p(&rgba);
     p.setCompositionMode(QPainter::CompositionMode_Source);
 
-    // ºìÉ«°ëÍ¸Ã÷
+    // çº¢è‰²åŠé€æ˜
     QColor c(255, 0, 0, alpha);
 
     p.setBrush(c);
@@ -48,10 +48,10 @@ void InpaintCanvas::initScene() {
     itemMask_ = scene_->addPixmap(QPixmap());
     itemMask_->setZValue(10);
 
-    // ´´½¨Ò»¸öÂÌÉ«µÄÊ¸Á¿¿ò£¬·ÅÔÚ×î¶¥²ã (ZValue¸ü¸ß)
+    // åˆ›å»ºä¸€ä¸ªç»¿è‰²çš„çŸ¢é‡æ¡†ï¼Œæ”¾åœ¨æœ€é¡¶å±‚ (ZValueæ›´é«˜)
     itemRect_ = scene_->addRect(QRectF(), QPen(Qt::green, 3), Qt::NoBrush);
     itemRect_->setZValue(20);
-    itemRect_->hide();                                                                      // Ä¬ÈÏÒş²Ø
+    itemRect_->hide();                                                                      // é»˜è®¤éšè—
 }
 
 bool InpaintCanvas::loadImage(const QString& file) {
@@ -66,7 +66,7 @@ void InpaintCanvas::setImage(const QImage& img)
     src_ = img.convertToFormat(QImage::Format_RGB888);
 
     mask_ = QImage(src_.size(), QImage::Format_Grayscale8);
-    mask_.fill(0);                                                                  // ´¿ºÚ
+    mask_.fill(0);                                                                  // çº¯é»‘
 
     updatePixmap();
     updateMaskPixmap();
@@ -95,7 +95,7 @@ void InpaintCanvas::clearMask()
     if (mask_.isNull()) return;
     labelPoints_.clear();
 
-    // Çå³ı¿ò
+    // æ¸…é™¤æ¡†
     boundingBox_ = QRectF();
     itemRect_->setRect(QRectF());
     itemRect_->hide();
@@ -144,34 +144,34 @@ void InpaintCanvas::mousePressEvent(QMouseEvent* e) {
     drawing_ = true;
     QPointF sp = viewToScenePos(e->pos());
 
-    // °´×¡ Shift + Êó±ê×ó¼ü£¬½øÈë»­¿òÄ£Ê½
+    // æŒ‰ä½ Shift + é¼ æ ‡å·¦é”®ï¼Œè¿›å…¥ç”»æ¡†æ¨¡å¼
     if ((e->modifiers() & Qt::ShiftModifier) && e->button() == Qt::LeftButton) {
         isDraggingBox_ = true;
         boxStartPos_ = sp;
-        boundingBox_ = QRectF(sp, sp); // ³õÊ¼»¯Ò»¸öĞ¡µã
+        boundingBox_ = QRectF(sp, sp); // åˆå§‹åŒ–ä¸€ä¸ªå°ç‚¹
         itemRect_->setRect(boundingBox_);
         itemRect_->show();
         e->accept();
         return;
     }
 
-    // ×ó¼üÍ¿µãÓÒ¼ü²Á³ı
+    // å·¦é”®æ¶‚ç‚¹å³é”®æ“¦é™¤
     QPainter p(&mask_);
     p.setRenderHint(QPainter::Antialiasing, true);
 
     if (e->button() == Qt::LeftButton)
     {
-        labelPoints_.append(sp);                                                                    // ±êÇ©
+        labelPoints_.append(sp);                                                                    // æ ‡ç­¾
     } 
     else if (e->button() == Qt::RightButton)
     {
         for (int i = 0; i < labelPoints_.size(); ++i) 
         {
             QPointF diff = labelPoints_[i] - sp;
-            // ¼ÆËãÁ½µã¼ä¾àÀëµÄÆ½·½
+            // è®¡ç®—ä¸¤ç‚¹é—´è·ç¦»çš„å¹³æ–¹
             double distSq = diff.x() * diff.x() + diff.y() * diff.y();
 
-            // Èç¹ûµã»÷Î»ÖÃÔÚ±ê¼ÇµãµÄ°ë¾¶·¶Î§ÄÚ É¾³ı×î½üµÄÒ»¸ö
+            // å¦‚æœç‚¹å‡»ä½ç½®åœ¨æ ‡è®°ç‚¹çš„åŠå¾„èŒƒå›´å†… åˆ é™¤æœ€è¿‘çš„ä¸€ä¸ª
             if (distSq <= brushRadius_ * brushRadius_) 
             {
                 labelPoints_.removeAt(i);
@@ -180,7 +180,7 @@ void InpaintCanvas::mousePressEvent(QMouseEvent* e) {
         }
     }
 
-    p.setBrush(e->button() == Qt::LeftButton ? Qt::white : Qt::black);                              // ºÚµ×ËùÒÔ×ó¼ü°×É«£¬ÓÒ¼üºÚÉ«
+    p.setBrush(e->button() == Qt::LeftButton ? Qt::white : Qt::black);                              // é»‘åº•æ‰€ä»¥å·¦é”®ç™½è‰²ï¼Œå³é”®é»‘è‰²
     p.drawEllipse(QPointF(sp.x(), sp.y()), brushRadius_, brushRadius_);
 
     updateMaskPixmap();
@@ -194,13 +194,13 @@ void InpaintCanvas::mouseMoveEvent(QMouseEvent* e)
     if (isDraggingBox_) 
     {
         QPointF sp = viewToScenePos(e->pos());
-        // normalized() ¿ÉÒÔ±£Ö¤ÎŞÂÛÍùÄÄ¸ö·½ÏòÍÏ£¬³¤¿í¶¼ÊÇÕıÊı
+        // normalized() å¯ä»¥ä¿è¯æ— è®ºå¾€å“ªä¸ªæ–¹å‘æ‹–ï¼Œé•¿å®½éƒ½æ˜¯æ­£æ•°
         boundingBox_ = QRectF(boxStartPos_, sp).normalized();
         itemRect_->setRect(boundingBox_);
         e->accept();
         return;
     }
-    // Èç¹ûÃ»ÓĞ»­¿ò£¬×ßÄ¬ÈÏÂß¼­£¨±ÈÈçÄãÔ­±¾ÓĞÃ»ÓĞÔÚ move ÀïĞ´µãÍ¿Ä¨Âß¼­£¬Èç¹ûÃ»ÓĞ¿ÉÒÔÖ±½Óµ÷¸¸Àà£©
+    // å¦‚æœæ²¡æœ‰ç”»æ¡†ï¼Œèµ°é»˜è®¤é€»è¾‘ï¼ˆæ¯”å¦‚ä½ åŸæœ¬æœ‰æ²¡æœ‰åœ¨ move é‡Œå†™ç‚¹æ¶‚æŠ¹é€»è¾‘ï¼Œå¦‚æœæ²¡æœ‰å¯ä»¥ç›´æ¥è°ƒçˆ¶ç±»ï¼‰
     QGraphicsView::mouseMoveEvent(e);
 }
 
@@ -216,7 +216,7 @@ void InpaintCanvas::mouseReleaseEvent(QMouseEvent* e)
 }
 
 void InpaintCanvas::wheelEvent(QWheelEvent* e) {
-    // Ctrl+¹öÂÖËõ·Å
+    // Ctrl+æ»šè½®ç¼©æ”¾
     if (e->modifiers() & Qt::ControlModifier) {
         const qreal factor = (e->angleDelta().y() > 0) ? 1.1 : 1.0 / 1.1;
         zoom_ *= factor;
@@ -229,5 +229,5 @@ void InpaintCanvas::wheelEvent(QWheelEvent* e) {
 
 void InpaintCanvas::resizeEvent(QResizeEvent* e) {
     QGraphicsView::resizeEvent(e);
-    // ²»Ç¿ĞĞ fit£¬±ÜÃâÓÃ»§Ëõ·Å±»ÖØÖÃ£¨ÄãÒ²¿ÉÒÔ°´Ğè¼Ó¸ö¡°Fit¡±°´Å¥£©
+    // ä¸å¼ºè¡Œ fitï¼Œé¿å…ç”¨æˆ·ç¼©æ”¾è¢«é‡ç½®ï¼ˆä½ ä¹Ÿå¯ä»¥æŒ‰éœ€åŠ ä¸ªâ€œFitâ€æŒ‰é’®ï¼‰
 }
