@@ -1,4 +1,4 @@
-﻿#include "MainWindow.h"
+#include "MainWindow.h"
 #include "ConfigReader.h"
 #include "LamaOrt.h"
 #include "InpaintCanvas.h"
@@ -168,7 +168,7 @@ void MainWindow::buildUi()
     actClear->setToolTip(u8"清除当前所有的涂抹痕迹");
 
     QAction* actQuick = tb->addAction("QuickInpaint");
-    actQuick->setToolTip(u8"执行擦除并【直接覆盖】当前文件 (慎用)");
+    actQuick->setToolTip(u8"擦除后保存到 out/ 和 labels/，并生成 YOLO 标签 (快捷键 Q)");
     actQuick->setShortcut(QKeySequence("Q"));                                       // 设置快捷键为 Q
 
     QAction* actRun = tb->addAction("Inpaint");
