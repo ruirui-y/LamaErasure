@@ -357,8 +357,6 @@ void MainWindow::onSetAsReference()
     if (!align_) align_ = std::make_shared<AlignToReference>();
 
     AlignToReference::Params p;
-    p.maxFeatures = 3000;
-    p.minInliers = 25;
     p.dilateR = 2;
 
     const bool ok = align_->SetReference(canvas_->sourceImage(), canvas_->maskImage(), canvas_->labelPoints(), canvas_->boundingBox(), p);
