@@ -1,9 +1,12 @@
-﻿#include "InpaintCanvas.h"
+#include "InpaintCanvas.h"
 #include <QGraphicsScene>
 #include <QMouseEvent>
 #include <QWheelEvent>
 #include <QPainter>
+#include <QPen>
+#include <QLineF>
 #include <QFileInfo>
+#include <QDebug>
 
 static QImage makeMaskOverlayRGBA(const QImage& maskGray, int alpha = 120)
 
@@ -52,6 +55,11 @@ void InpaintCanvas::initScene() {
     itemRect_ = scene_->addRect(QRectF(), QPen(Qt::green, 3), Qt::NoBrush);
     itemRect_->setZValue(20);
     itemRect_->hide();                                                                      // 默认隐藏
+
+    // Tracking ROI 显示框（黄色细线，独立于 BoundingBox）
+    itemTrackRoi_ = scene_->addRect(QRectF(), QPen(Qt::yellow, 1), Qt::NoBrush);
+    itemTrackRoi_->setZValue(19);
+    itemTrackRoi_->hide();                                                                  // 默认隐藏
 }
 
 bool InpaintCanvas::loadImage(const QString& file) {
@@ -67,6 +75,12 @@ void InpaintCanvas::setImage(const QImage& img)
 
     mask_ = QImage(src_.size(), QImage::Format_Grayscale8);
     mask_.fill(0);                                                                  // 纯黑
+
+    // 换图后 Tracking ROI 失效，一并清除
+    trackingRoiImage_ = QRect();
+    isDraggingTrack_ = false;
+    itemTrackRoi_->setRect(QRectF());
+    itemTrackRoi_->hide();
 
     updatePixmap();
     updateMaskPixmap();
@@ -105,6 +119,16 @@ void InpaintCanvas::clearMask()
     emit maskChanged();
 }
 
+void InpaintCanvas::clearTrackingRoi()
+{
+    trackingRoiImage_ = QRect();
+    isDraggingTrack_ = false;
+    if (itemTrackRoi_) {
+        itemTrackRoi_->setRect(QRectF());
+        itemTrackRoi_->hide();
+    }
+}
+
 void InpaintCanvas::updatePixmap() 
 {
     if (src_.isNull()) return;
@@ -134,6 +158,29 @@ void InpaintCanvas::paintAt(const QPointF& sp) {
     p.setBrush(drawing_ ? Qt::white : Qt::black);
 }
 
+void InpaintCanvas::applyBrush(const QPointF& a, const QPointF& b, bool erase)
+{
+    if (src_.isNull() || mask_.isNull()) return;
+
+    QPainter p(&mask_);
+    p.setRenderHint(QPainter::Antialiasing, true);
+
+    const QColor c = erase ? Qt::black : Qt::white;
+
+    QPen pen(c, brushRadius_ * 2);
+    pen.setCapStyle(Qt::RoundCap);
+    pen.setJoinStyle(Qt::RoundJoin);
+
+    p.setPen(pen);
+    p.setBrush(c);
+
+    // 连续笔触
+    p.drawLine(QLineF(a, b));
+
+    // 保证单击或移动很慢时也能形成圆形笔触
+    p.drawEllipse(b, brushRadius_, brushRadius_);
+}
+
 void InpaintCanvas::mousePressEvent(QMouseEvent* e) {
     if (src_.isNull())
     {
@@ -143,6 +190,23 @@ void InpaintCanvas::mousePressEvent(QMouseEvent* e) {
     
     drawing_ = true;
     QPointF sp = viewToScenePos(e->pos());
+
+    // TrackROI 模式：左键拖一个矩形作为 Tracking ROI（不参与 Mask/标签）
+    // 坐标转换：viewport widget 坐标 -> mapToScene -> 原图像素坐标（scene==image）
+    if (trackingMode_ && e->button() == Qt::LeftButton) {
+        const QPoint wp = e->pos();                                     // viewport(widget) 坐标
+        const QPoint ip = viewToScenePos(wp).toPoint();                 // 原图像素坐标（唯一真实数据）
+        trackStartWidget_ = wp;
+        trackStartPos_ = ip;
+        isDraggingTrack_ = true;
+        trackingRoiImage_ = QRect(ip, ip);
+        itemTrackRoi_->setRect(QRectF(trackingRoiImage_));
+        itemTrackRoi_->show();
+        qDebug().noquote() << QString("TrackROI widgetStart=(%1,%2) imageStart=(%3,%4)")
+            .arg(wp.x()).arg(wp.y()).arg(ip.x()).arg(ip.y());
+        e->accept();
+        return;
+    }
 
     // 按住 Shift + 鼠标左键，进入画框模式
     if ((e->modifiers() & Qt::ShiftModifier) && e->button() == Qt::LeftButton) {
@@ -155,34 +219,10 @@ void InpaintCanvas::mousePressEvent(QMouseEvent* e) {
         return;
     }
 
-    // 左键涂点右键擦除
-    QPainter p(&mask_);
-    p.setRenderHint(QPainter::Antialiasing, true);
-
-    if (e->button() == Qt::LeftButton)
-    {
-        labelPoints_.append(sp);                                                                    // 标签
-    } 
-    else if (e->button() == Qt::RightButton)
-    {
-        for (int i = 0; i < labelPoints_.size(); ++i) 
-        {
-            QPointF diff = labelPoints_[i] - sp;
-            // 计算两点间距离的平方
-            double distSq = diff.x() * diff.x() + diff.y() * diff.y();
-
-            // 如果点击位置在标记点的半径范围内 删除最近的一个
-            if (distSq <= brushRadius_ * brushRadius_) 
-            {
-                labelPoints_.removeAt(i);
-                break;
-            }
-        }
-    }
-
-    p.setBrush(e->button() == Qt::LeftButton ? Qt::white : Qt::black);                              // 黑底所以左键白色，右键黑色
-    p.drawEllipse(QPointF(sp.x(), sp.y()), brushRadius_, brushRadius_);
-
+    // 画笔：左键涂白，右键擦黑（连续拖动画笔，不再记录/删除 labelPoints）
+    const bool erase = (e->button() == Qt::RightButton);
+    applyBrush(sp, sp, erase);
+    lastPaintPos_ = sp;
     updateMaskPixmap();
     emit maskChanged();
     e->accept();
@@ -191,6 +231,15 @@ void InpaintCanvas::mousePressEvent(QMouseEvent* e) {
 
 void InpaintCanvas::mouseMoveEvent(QMouseEvent* e)
 {
+    if (isDraggingTrack_)
+    {
+        const QPoint ip = viewToScenePos(e->pos()).toPoint();           // 原图像素坐标
+        trackingRoiImage_ = QRect(trackStartPos_, ip).normalized();
+        itemTrackRoi_->setRect(QRectF(trackingRoiImage_));
+        e->accept();
+        return;
+    }
+
     if (isDraggingBox_) 
     {
         QPointF sp = viewToScenePos(e->pos());
@@ -200,12 +249,47 @@ void InpaintCanvas::mouseMoveEvent(QMouseEvent* e)
         e->accept();
         return;
     }
-    // 如果没有画框，走默认逻辑（比如你原本有没有在 move 里写点涂抹逻辑，如果没有可以直接调父类）
+
+    // 连续画笔：左键拖动涂白，右键拖动擦黑（Photoshop 式体验）
+    if (e->buttons() & Qt::LeftButton) {
+        QPointF sp = viewToScenePos(e->pos());
+        applyBrush(lastPaintPos_, sp, false);
+        lastPaintPos_ = sp;
+        updateMaskPixmap();
+        emit maskChanged();
+        e->accept();
+        return;
+    }
+    if (e->buttons() & Qt::RightButton) {
+        QPointF sp = viewToScenePos(e->pos());
+        applyBrush(lastPaintPos_, sp, true);
+        lastPaintPos_ = sp;
+        updateMaskPixmap();
+        emit maskChanged();
+        e->accept();
+        return;
+    }
+    // 否则走默认逻辑
     QGraphicsView::mouseMoveEvent(e);
 }
 
 void InpaintCanvas::mouseReleaseEvent(QMouseEvent* e) 
 {
+    if (isDraggingTrack_ && e->button() == Qt::LeftButton) {
+        isDraggingTrack_ = false;
+        // 拖完打印完整坐标日志（widget 侧 + image 侧），直接验证"鼠标框哪里 -> 原图坐标就是哪里"
+        const QPoint wpEnd = e->pos();
+        const QPoint ipEnd = viewToScenePos(wpEnd).toPoint();
+        qDebug().noquote() << QString("TrackROI widgetEnd=(%1,%2) imageEnd=(%3,%4)")
+            .arg(wpEnd.x()).arg(wpEnd.y()).arg(ipEnd.x()).arg(ipEnd.y());
+        qDebug().noquote() << QString("TrackROI IMAGE rect=(%1,%2,%3,%4)")
+            .arg(trackingRoiImage_.x()).arg(trackingRoiImage_.y())
+            .arg(trackingRoiImage_.width()).arg(trackingRoiImage_.height());
+        emit trackingRoiChanged(trackingRoiImage_);
+        e->accept();
+        return;
+    }
+
     if (isDraggingBox_ && e->button() == Qt::LeftButton) {
         isDraggingBox_ = false;
         e->accept();
