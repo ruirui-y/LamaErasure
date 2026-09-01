@@ -4,6 +4,7 @@
 #include <QThread>
 #include <QDirIterator>
 #include <QFileInfo>
+#include <QVector>
 #include <QImageReader>
 #include <QImageWriter>
 #include <QDir>
@@ -76,9 +77,16 @@ public slots:
             bool ok = false;
             QList<QPointF> label_points;
             QRectF target_box;
-            QImage maskForThis = align_->MakeMaskFor(img, &label_points, &target_box, &ok);
+            QVector<AlignToReference::LocalMatchResult> tracks;
+            QImage maskForThis = align_->MakeMaskFor(img, &label_points, &target_box, &ok, &tracks);
             if (!ok || maskForThis.isNull())
             {
+                // 指出失败 Track 编号与分数
+                int fid = -1; double fs = 0.0;
+                for (const auto& r : tracks) { if (!r.ok) { fid = r.id; fs = r.score; break; } }
+                emit progress(i + 1, total,
+                    fi.fileName() + QString(" (local track %1 failed, score=%2)")
+                        .arg(fid).arg(QString::number(fs, 'f', 2)));
                 continue;
             }
 
