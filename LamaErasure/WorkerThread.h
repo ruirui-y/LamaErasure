@@ -22,11 +22,8 @@ public:
     QObject* Dispatcher() const { return dispatcher_.load(std::memory_order_acquire); }
 
 public:
-    // 终极泛型创建函数
-    // 参数1：你要创建的对象类型 T
-    // 参数2：你要使用的智能指针类型 SmartPtr (默认是 QSharedPointer)
-    // 参数3：构造函数的参数 Args...
-    template<class T, template<typename> class SmartPtr = QSharedPointer, class... Args>
+	// 在目标线程中泛型创建 QObject
+	template<class T, template<typename> class SmartPtr = QSharedPointer, class... Args>
     SmartPtr<T> CreateQObject(Args&&... args)
     {
         static_assert(std::is_base_of_v<QObject, T>, "T must derive from QObject");

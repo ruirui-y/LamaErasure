@@ -18,8 +18,7 @@ public:
     };
 
 public:
-    // iniRelativeToApp: 默认 "Config/config.ini"
-    explicit ConfigReader(const QString& iniRelativeToApp = "Config/config.ini");
+    explicit ConfigReader(const QString& iniRelativeToApp = "Config/config.ini");      // 默认 "Config/config.ini"
     
     bool reload();                                                              // 重新读取 ini
     bool isValid() const;                                                       // onnx 路径是否存在（至少有这个）
@@ -28,8 +27,7 @@ public:
     const Paths& paths();                                                       // 读取到的路径
     QString lastError() const;                                                  // 错误信息
 
-    // 方便：把 ini 里读到的相对路径转绝对路径（相对 exe 目录）
-    static QString resolvePathFromApp(const QString& p);
+    static QString resolvePathFromApp(const QString& p);                               // 相对 exe 目录转绝对路径
 
 private:
     QString iniPath_;

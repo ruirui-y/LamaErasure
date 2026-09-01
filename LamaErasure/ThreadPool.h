@@ -24,7 +24,7 @@ public:
 	QSharedPointer<WorkerThread> GetThread();
 
 public:
-	// 终极泛型分发引擎：自动处理线程获取、生命周期保持与跨线程跳跃
+	// 泛型分发任务到工作线程
 	template<typename TaskFunc>
 	void DispatchToWorker(TaskFunc&& task)
 	{

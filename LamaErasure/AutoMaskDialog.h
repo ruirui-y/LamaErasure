@@ -13,8 +13,7 @@ class AutoMaskDialog : public QDialog {
 public:
     explicit AutoMaskDialog(QWidget* parent = nullptr);
 
-    // 读取用户填写的参数
-    MaskParams params() const;
+    MaskParams params() const;                                                       // 读取用户填写的参数
 
 private:
     QSpinBox* spMinR_ = nullptr;

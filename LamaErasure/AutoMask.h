@@ -11,6 +11,7 @@
 #include "singletion.h"
 #include "GlobalStruct.h"
 
+// 贴纸圆检测：自动生成遮罩
 class AutoMask  : public QObject, public Singleton<AutoMask>
 {
 	Q_OBJECT

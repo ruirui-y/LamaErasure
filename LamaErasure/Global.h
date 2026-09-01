@@ -1,4 +1,4 @@
-﻿#ifndef GLOBAL_H
+#ifndef GLOBAL_H
 #define GLOBAL_H
 
 #include <QImage>
@@ -15,7 +15,7 @@
 
 using ImageCallback = std::function<void(const QImage&)>;
 
-// 保存标签
+// 保存 YOLO 标签
 inline void saveYoloLabels(const QRectF& bbox, const QList<QPointF>& points, const QString& labelPath, const QSize& imgSize)
 {
     QFile file(labelPath);
